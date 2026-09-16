@@ -8,3 +8,6 @@ torch
 wfdb
 pyyaml
 tqdm
+jupyter
+nbformat
+ipykernel
