@@ -385,7 +385,7 @@
 <section id="speed">
   <p class="eyebrow">03 &middot; Size and speed</p>
   <h2>Inference latency, alongside accuracy</h2>
-  <p>Single-window inference, same GPU used for training. Model capacity was kept deliberately small (architecture.md section 6) — this is the check that the claim holds.</p>
+  <p>Single-window inference, same GPU used for training. Model capacity was kept deliberately small to avoid overfitting this dataset size — this is the check that the claim holds.</p>
   <div class="card table-scroll" style="margin-top:20px;">
     <table>
       <thead>
@@ -578,8 +578,7 @@
       Built for the PhysioNet/CinC Challenge&nbsp;2015 dataset (750 public ICU alarm records) with an external
       generalization check on MIMIC&nbsp;PERform&nbsp;AF (Charlton PH et al., <em>Physiological Measurement</em>
       2022). Full pipeline, training code, and the reproducible <span class="mono">results.ipynb</span> report
-      live in the project repository — see <code class="inline">proposal.md</code>, <code class="inline">architecture.md</code>,
-      and <code class="inline">datasets.md</code> for the complete write-up.
+      live in the project repository.
     </p>
   </div>
 </footer>
