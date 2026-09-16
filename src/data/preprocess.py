@@ -32,10 +32,17 @@ from src.data.signal_ops import (  # noqa: E402
 )
 
 
-def extract_window(sig: np.ndarray, fs: float, center_s: float, window_s: float) -> np.ndarray | None:
-    half = window_s / 2.0
-    start = int(round((center_s - half) * fs))
-    end = int(round((center_s + half) * fs))
+def extract_window(sig: np.ndarray, fs: float, trigger_s: float, window_s: float) -> np.ndarray | None:
+    """Window ends AT the alarm trigger (no post-alarm data used).
+
+    Challenge 2015 "short" records run exactly to the 300s trigger with no
+    signal after it; "long" records carry extra history before that point.
+    Anchoring the window's end to the trigger (rather than centering on it)
+    is the only alignment that works for both without discarding the short
+    records outright.
+    """
+    end = int(round(trigger_s * fs))
+    start = end - int(round(window_s * fs))
     if start < 0 or end > len(sig):
         return None
     return sig[start:end]
