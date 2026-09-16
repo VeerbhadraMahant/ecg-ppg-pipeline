@@ -57,3 +57,16 @@ def test_signal_quality_score_flatline_low():
     x = np.zeros(2500)
     q = signal_quality_score(x, flatline_std_threshold=0.01, clip_fraction_threshold=0.2)
     assert q < 0.5
+
+
+def test_interpolate_nans_removes_all_nans_and_preserves_shape():
+    from src.data.mimic_perform_loader import _interpolate_nans
+
+    x = np.sin(2 * np.pi * np.arange(200) / 50)
+    x_with_gaps = x.copy()
+    x_with_gaps[[5, 6, 7, 100, 199]] = np.nan
+    y = _interpolate_nans(x_with_gaps)
+    assert not np.isnan(y).any()
+    assert y.shape == x.shape
+    # interpolated values should stay close to the true signal
+    assert np.abs(y[6] - x[6]) < 0.2

@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import yaml
+from torch.utils.data import DataLoader
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -93,9 +94,13 @@ def main() -> None:
         model.eval()
 
         ds = AlarmWindowDataset(data["ecg"], data["ppg"], data["label"])
+        loader = DataLoader(ds, batch_size=cfg["train"]["batch_size"] * 2, shuffle=False)
+        probs = []
         with torch.no_grad():
-            logits, _ = model(ds.ecg.to(device), ds.ppg.to(device))
-            prob = torch.sigmoid(logits).cpu().numpy()
+            for ecg_b, ppg_b, _ in loader:
+                logits, _ = model(ecg_b.to(device), ppg_b.to(device))
+                probs.append(torch.sigmoid(logits).cpu().numpy())
+        prob = np.concatenate(probs)
         m = binary_metrics(data["label"], prob)
         m["checkpoint"] = ckpt_path.name
         all_metrics.append(m)

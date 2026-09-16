@@ -36,12 +36,27 @@ def infer_fs(df: pd.DataFrame, time_col: str | None) -> float:
     raise ValueError("no time column found to infer sampling rate")
 
 
+def _interpolate_nans(x: np.ndarray) -> np.ndarray:
+    """Sparse sensor dropouts show up as NaN in the raw CSVs. filtfilt
+    propagates a single NaN across the entire output via its IIR recursion,
+    so these are linearly interpolated (not zero-filled) before filtering."""
+    nan_mask = np.isnan(x)
+    if not nan_mask.any():
+        return x
+    idx = np.arange(len(x))
+    x = x.copy()
+    x[nan_mask] = np.interp(idx[nan_mask], idx[~nan_mask], x[~nan_mask])
+    return x
+
+
 def load_subject_csv(path: Path) -> tuple[np.ndarray, np.ndarray, float]:
     df = pd.read_csv(path)
     time_col = next((c for c in df.columns if c.lower() in ("time", "time_s", "t")), None)
     ecg_col, ppg_col = find_signal_columns(list(df.columns))
     fs = infer_fs(df, time_col)
-    return df[ecg_col].to_numpy(dtype=np.float64), df[ppg_col].to_numpy(dtype=np.float64), fs
+    ecg = _interpolate_nans(df[ecg_col].to_numpy(dtype=np.float64))
+    ppg = _interpolate_nans(df[ppg_col].to_numpy(dtype=np.float64))
+    return ecg, ppg, fs
 
 
 def iter_subjects(mimic_dir: Path):
