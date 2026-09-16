@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECG+PPG Fusion — Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #111a4a;
+    --seafoam: #44b48b;
+    --seafoam-dark: #167e6c;
+    --seafoam-light: #94efb7;
+    --seafoam-tint: #eaf7f2;
+    --orange: #ec652b;
+    --steel: #7c7f88;
+    --slate: #3b3e47;
+    --cloud: #f6f6f8;
+    --white: #ffffff;
+    --border: #e3e4e8;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--cloud);
+    color: var(--slate);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 0 16px;
+  }
+  .mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  /* Nav */
+  nav.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(246,246,248,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    height: 62px; display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--navy); text-decoration: none; }
+  .brand-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .brand-mark svg { width: 16px; height: 16px; }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-links a {
+    color: var(--steel); text-decoration: none; font-size: 14px; font-weight: 500;
+    padding: 8px 12px; border-radius: 8px; transition: background 150ms ease, color 150ms ease;
+  }
+  .nav-links a:hover { background: var(--white); color: var(--navy); }
+
+  /* Sections */
+  section { padding-block: 56px; }
+  section:first-of-type { padding-top: 48px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--seafoam-dark);
+    margin: 0 0 12px;
+  }
+  h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 20px; text-wrap: balance; }
+  h2 { font-size: clamp(24px, 3.5vw, 32px); font-weight: 600; line-height: 1.15; color: var(--navy); margin: 0 0 12px; text-wrap: balance; }
+  h3 { font-size: 18px; font-weight: 600; color: var(--slate); margin: 0 0 8px; }
+  p { color: var(--steel); margin: 0 0 16px; max-width: 70ch; }
+  .lede { font-size: 19px; line-height: 1.55; max-width: 62ch; }
+
+  /* Hero */
+  .hero { display: grid; gap: 16px; }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+    background: var(--white); border: 1px solid var(--border); border-radius: 9999px;
+    padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--slate);
+    box-shadow: rgba(18,22,30,0.024) 0px 1px 4px;
+  }
+  .hero-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--seafoam); flex-shrink: 0; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
+  .stat-tile {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; box-shadow: rgba(18,22,30,0.024) 0px 1px 4px;
+  }
+  .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 500; color: var(--navy); font-variant-numeric: tabular-nums; }
+  .stat-value.accent { color: var(--seafoam-dark); }
+  .stat-label { font-size: 13px; color: var(--steel); margin-top: 4px; }
+
+  /* Cards */
+  .card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; box-shadow: rgba(18,22,30,0.024) 0px 1px 4px;
+  }
+  .card.elevated { box-shadow: rgba(30,30,44,0.10) 12px 24px 32px; }
+  .grid-2 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: start; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--steel); font-weight: 500; }
+  td.num, th.num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; text-align: right; }
+  tr.highlight td { background: var(--seafoam-tint); font-weight: 600; color: var(--navy); }
+  tr.highlight td:first-child { border-radius: 8px 0 0 8px; }
+  tr.highlight td:last-child { border-radius: 0 8px 8px 0; }
+  .table-scroll { overflow-x: auto; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 9999px; }
+  .pill.win { background: var(--seafoam-tint); color: var(--seafoam-dark); }
+
+  /* Bar chart (SVG) */
+  .chart-caption { font-size: 13px; color: var(--steel); margin-top: 10px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--steel); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  /* Attention gallery */
+  .att-card img { width: 100%; border-radius: 6px; border: 1px solid var(--border); display: block; }
+  .att-caption { margin-top: 10px; font-size: 13px; }
+  .label-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 500; }
+  .label-badge.true { background: var(--seafoam-tint); color: var(--seafoam-dark); }
+  .label-badge.false { background: #fdece3; color: #c14a1a; }
+
+  /* Footer */
+  footer { padding-block: 40px 60px; border-top: 1px solid var(--border); margin-top: 24px; }
+  footer p { font-size: 13px; }
+  footer a { color: var(--navy); }
+
+  code.inline { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
+
+  @media (max-width: 860px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12h4l2-7 4 14 3-9 2 4h5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      ECG+PPG Fusion
+    </a>
+    <div class="nav-links">
+      <a href="#ladder">Results</a>
+      <a href="#quality">Signal Quality</a>
+      <a href="#attention">Attention Maps</a>
+      <a href="#external">External Validation</a>
+      <a href="#method">Method</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<section id="top" class="hero">
+  <div class="hero-tag"><span class="dot"></span> PhysioNet/CinC Challenge 2015 &middot; Record-wise 5-fold CV &times; 3 seeds</div>
+  <h1>Does cross-attention between ECG and PPG catch false ICU alarms that neither signal — or naive fusion — catches alone?</h1>
+  <p class="lede">
+    A dual-encoder model reads the electrical trace (ECG) and the peripheral pulse waveform (PPG) around
+    an arrhythmia alarm, and a transformer cross-attention layer lets the ECG query the PPG for corroboration —
+    a missing pulse during asystole, an irregular pulse train during a true tachyarrhythmia — before deciding
+    whether the alarm is real.
+  </p>
+  <div class="stat-row">
+    <div class="stat-tile">
+      <div class="stat-value accent">0.774</div>
+      <div class="stat-label">F1 — cross-attention (best variant)</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value accent">0.866</div>
+      <div class="stat-label">AUC — cross-attention</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">592</div>
+      <div class="stat-label">alarm records used (of 750 public)</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">0.642</div>
+      <div class="stat-label">F1 on external MIMIC PERform AF</div>
+    </div>
+  </div>
+</section>
+
+<section id="ladder">
+  <p class="eyebrow">01 &middot; Core result</p>
+  <h2>The baseline ladder</h2>
+  <p>
+    Four models, matched to within ~2% of the same parameter budget (~252K&ndash;266K params) so a win is
+    attributable to the fusion mechanism and not extra capacity. Every number below is the mean &plusmn; std
+    across 3 random seeds &times; 5 record-wise folds — never window-wise, so no patient's signal leaks across
+    the train/validation split.
+  </p>
+
+  <div class="card table-scroll" style="margin-top:20px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Variant</th>
+          <th class="num">Params</th>
+          <th class="num">F1</th>
+          <th class="num">Sensitivity</th>
+          <th class="num">Specificity</th>
+          <th class="num">AUC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PPG&nbsp;only</td>
+          <td class="num">266,001</td>
+          <td class="num">0.660 &plusmn; 0.039</td>
+          <td class="num">0.856 &plusmn; 0.076</td>
+          <td class="num">0.555 &plusmn; 0.106</td>
+          <td class="num">0.747 &plusmn; 0.051</td>
+        </tr>
+        <tr>
+          <td>ECG&nbsp;only</td>
+          <td class="num">266,001</td>
+          <td class="num">0.736 &plusmn; 0.030</td>
+          <td class="num">0.805 &plusmn; 0.058</td>
+          <td class="num">0.758 &plusmn; 0.126</td>
+          <td class="num">0.818 &plusmn; 0.053</td>
+        </tr>
+        <tr>
+          <td>Concatenation fusion</td>
+          <td class="num">252,229</td>
+          <td class="num">0.750 &plusmn; 0.030</td>
+          <td class="num">0.804 &plusmn; 0.068</td>
+          <td class="num">0.794 &plusmn; 0.067</td>
+          <td class="num">0.853 &plusmn; 0.031</td>
+        </tr>
+        <tr class="highlight">
+          <td>Cross&#8209;attention fusion <span class="pill win">proposed</span></td>
+          <td class="num">261,505</td>
+          <td class="num">0.774 &plusmn; 0.046</td>
+          <td class="num">0.797 &plusmn; 0.062</td>
+          <td class="num">0.831 &plusmn; 0.109</td>
+          <td class="num">0.866 &plusmn; 0.041</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <svg viewBox="0 0 760 300" width="100%" height="300" role="img" aria-label="Bar chart comparing F1 and AUC across the four model variants">
+      <!-- plot area: y=30 (value 1.0) to y=250 (value 0.0), 220px = 1.0 -->
+      <g stroke="#eceef1" stroke-width="1">
+        <line x1="60" y1="30" x2="60" y2="250"/>
+        <line x1="60" y1="250" x2="740" y2="250"/>
+        <line x1="60" y1="140" x2="740" y2="140" stroke-dasharray="2,4"/>
+        <line x1="60" y1="85" x2="740" y2="85" stroke-dasharray="2,4"/>
+        <line x1="60" y1="30" x2="740" y2="30" stroke-dasharray="2,4"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="11" fill="#7c7f88">
+        <text x="52" y="253" text-anchor="end">0.0</text>
+        <text x="52" y="143" text-anchor="end">0.5</text>
+        <text x="52" y="88" text-anchor="end">0.75</text>
+        <text x="52" y="33" text-anchor="end">1.0</text>
+      </g>
+      <!-- bars: groups of F1(seafoam) + AUC(navy) per variant -->
+      <g>
+        <!-- ppg_only: F1=0.660 -> h=145.2 y=104.8, AUC=0.747 -> h=164.3 y=85.7 -->
+        <rect x="95" y="104.8" width="34" height="145.2" fill="#94c9b0" rx="3"/>
+        <rect x="133" y="85.7" width="34" height="164.3" fill="#111a4a" rx="3"/>
+        <text x="131" y="270" text-anchor="middle" font-family="Inter" font-size="12" fill="#3b3e47">PPG only</text>
+
+        <!-- ecg_only: F1=0.736 -> h=161.9 y=88.1, AUC=0.818 -> h=180.0 y=70.0 -->
+        <rect x="255" y="88.1" width="34" height="161.9" fill="#94c9b0" rx="3"/>
+        <rect x="293" y="70.0" width="34" height="180.0" fill="#111a4a" rx="3"/>
+        <text x="291" y="270" text-anchor="middle" font-family="Inter" font-size="12" fill="#3b3e47">ECG only</text>
+
+        <!-- concat: F1=0.750 -> h=165.0 y=85.0, AUC=0.853 -> h=187.7 y=62.3 -->
+        <rect x="415" y="85.0" width="34" height="165.0" fill="#94c9b0" rx="3"/>
+        <rect x="453" y="62.3" width="34" height="187.7" fill="#111a4a" rx="3"/>
+        <text x="451" y="270" text-anchor="middle" font-family="Inter" font-size="12" fill="#3b3e47">Concat</text>
+
+        <!-- cross_attention: F1=0.774 -> h=170.3 y=79.7, AUC=0.866 -> h=190.5 y=59.5 -->
+        <rect x="575" y="79.7" width="34" height="170.3" fill="#44b48b" rx="3"/>
+        <rect x="613" y="59.5" width="34" height="190.5" fill="#111a4a" rx="3"/>
+        <text x="611" y="270" text-anchor="middle" font-family="Inter" font-size="12" fill="#3b3e47" font-weight="600">Cross-attn</text>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#94c9b0"></i> F1 (other variants)</span>
+      <span><i style="background:#44b48b"></i> F1 (cross-attention)</span>
+      <span><i style="background:#111a4a"></i> AUC</span>
+    </div>
+    <p class="chart-caption">
+      Ordering on both metrics is monotonic in the predicted direction: PPG&nbsp;only &lt; ECG&nbsp;only &lt; concatenation &lt; cross-attention.
+      That gap between concatenation and cross-attention — <strong style="color:var(--slate)">+0.024 F1, +0.013 AUC</strong> at matched
+      parameter count — is the specific quantity this project exists to measure.
+    </p>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h3>PPG alone is weak, but not redundant</h3>
+      <p style="margin-bottom:0">
+        PPG&#8209;only is the worst single-signal model (F1 0.660), yet adding it back — even without attention —
+        lifts concatenation above ECG&#8209;only. Its failure modes (perfusion loss, probe movement) are
+        independent of ECG's, so it contributes real information the model can't get from ECG alone.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Attention narrows the specificity gap</h3>
+      <p style="margin-bottom:0">
+        Cross-attention posts the highest specificity (0.831) of any variant — it is comparatively better at
+        recognizing when an ECG-abnormal window is <em>not</em> corroborated by the pulse, which is exactly the
+        false-alarm case the whole task is built around.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="quality">
+  <p class="eyebrow">02 &middot; Robustness</p>
+  <h2>Performance vs. signal quality</h2>
+  <p>Windows scored on a flatline/clipping heuristic and split into terciles, evaluated with the cross-attention model on a held-out fold.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <svg viewBox="0 0 380 240" width="100%" height="220" role="img" aria-label="F1 by signal quality tercile">
+        <g stroke="#eceef1" stroke-width="1">
+          <line x1="50" y1="20" x2="50" y2="190"/>
+          <line x1="50" y1="190" x2="360" y2="190"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="#7c7f88">
+          <text x="44" y="193" text-anchor="end">0.0</text>
+          <text x="44" y="107" text-anchor="end">0.5</text>
+          <text x="44" y="24" text-anchor="end">1.0</text>
+        </g>
+        <!-- bars: F1 0.571, 0.815, 0.783 scaled height 170px = 1.0 -->
+        <rect x="90" y="93" width="70" height="97" fill="#c7e4d8" rx="4"/>
+        <rect x="205" y="51.5" width="70" height="138.5" fill="#44b48b" rx="4"/>
+        <rect x="285" y="57" width="70" height="133" fill="#167e6c" rx="4"/>
+        <g font-family="Inter" font-size="12" fill="#3b3e47" text-anchor="middle">
+          <text x="125" y="207">Low (n=39)</text>
+          <text x="240" y="207">Mid (n=29)</text>
+          <text x="320" y="207">High (n=50)</text>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="12" fill="#111a4a" text-anchor="middle" font-weight="600">
+          <text x="125" y="86">0.571</text>
+          <text x="240" y="44">0.815</text>
+          <text x="320" y="50">0.783</text>
+        </g>
+      </svg>
+      <p class="chart-caption">F1 by signal-quality tercile (cross-attention, held-out fold).</p>
+    </div>
+    <div class="card">
+      <h3>Reading the quality curve</h3>
+      <p>
+        F1 is lowest in the noisiest tercile and recovers sharply once signal quality crosses the low threshold —
+        consistent with the premise that low-quality ECG/PPG windows are genuinely harder to verify, not an
+        artifact of the split. The gap between the lowest and middle terciles (+0.24 F1) is the largest jump in
+        the whole curve.
+      </p>
+      <p style="margin-bottom:0">
+        This is a single held-out fold (39/29/50 windows per bin), so treat the exact numbers as indicative — the
+        pipeline (<code class="inline">src/evaluate.py</code>) reruns this stratification for any fold or variant on request.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="attention">
+  <p class="eyebrow">03 &middot; Interpretability</p>
+  <h2>What the attention layer actually looks at</h2>
+  <p>
+    Extracted cross-attention weight matrices (ECG query time &rarr; PPG key time) for individual alarm windows,
+    alongside the raw ECG and PPG traces — checked for whether the learned alignment tracks real ECG-to-pulse
+    timing rather than a dataset artifact.
+  </p>
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="card att-card">
+      <img src="assets/attention_true_alarm.png" alt="Attention map for record v630s, a true ventricular tachycardia alarm">
+      <div class="att-caption">
+        <span class="label-badge true">TRUE ALARM</span>
+        <div style="margin-top:6px; color:var(--steel);"><span class="mono">v630s</span> &middot; Ventricular Tachycardia</div>
+      </div>
+    </div>
+    <div class="card att-card">
+      <img src="assets/attention_asystole.png" alt="Attention map for record a163l, a false asystole alarm">
+      <div class="att-caption">
+        <span class="label-badge false">FALSE ALARM</span>
+        <div style="margin-top:6px; color:var(--steel);"><span class="mono">a163l</span> &middot; Asystole</div>
+      </div>
+    </div>
+    <div class="card att-card">
+      <img src="assets/attention_tachycardia.png" alt="Attention map for record t235l, a true tachycardia alarm">
+      <div class="att-caption">
+        <span class="label-badge true">TRUE ALARM</span>
+        <div style="margin-top:6px; color:var(--steel);"><span class="mono">t235l</span> &middot; Tachycardia</div>
+      </div>
+    </div>
+  </div>
+  <p class="chart-caption" style="margin-top:16px;">
+    Full gallery (8 examples) and the generating script live at <code class="inline">runs/attention_plots/</code> and
+    <code class="inline">src/attention_viz.py</code> in the repository.
+  </p>
+</section>
+
+<section id="external">
+  <p class="eyebrow">04 &middot; Generalization</p>
+  <h2>External validation — MIMIC PERform AF</h2>
+  <p>
+    35 subjects (19 AF, 16 non-AF), <strong style="color:var(--slate)">never trained on</strong>. This is a
+    genuine distribution shift: a different hospital population, and a different label (AF vs. non-AF, rather
+    than true/false alarm) — read it as a transfer/generalization signal, not an apples-to-apples benchmark.
+  </p>
+  <div class="grid-2">
+    <div class="card table-scroll">
+      <table>
+        <thead>
+          <tr><th>Fold checkpoint</th><th class="num">F1</th><th class="num">Sens.</th><th class="num">Spec.</th><th class="num">AUC</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">fold 0</td><td class="num">0.542</td><td class="num">0.404</td><td class="num">0.896</td><td class="num">0.742</td></tr>
+          <tr><td class="mono">fold 1</td><td class="num">0.581</td><td class="num">0.472</td><td class="num">0.820</td><td class="num">0.732</td></tr>
+          <tr><td class="mono">fold 2</td><td class="num">0.661</td><td class="num">0.686</td><td class="num">0.537</td><td class="num">0.676</td></tr>
+          <tr><td class="mono">fold 3</td><td class="num">0.693</td><td class="num">0.723</td><td class="num">0.568</td><td class="num">0.727</td></tr>
+          <tr><td class="mono">fold 4</td><td class="num">0.733</td><td class="num">0.909</td><td class="num">0.322</td><td class="num">0.716</td></tr>
+          <tr class="highlight"><td>mean &plusmn; std</td><td class="num">0.642 &plusmn; 0.071</td><td class="num" colspan="3">4,200 windows &middot; 54.3% AF</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Why this number is lower than in-distribution</h3>
+      <p style="margin-bottom:0">
+        The model was trained to answer "does the PPG corroborate this ECG-flagged arrhythmia event," not
+        "is this window AF." AF detection and alarm verification are related — both hinge on ECG/PPG agreement —
+        but not identical tasks, and MIMIC PERform AF was collected on a different device/population than the
+        Challenge 2015 ICU monitors. An F1 around 0.64 on a fully out-of-distribution transfer task is a
+        reasonable generalization signal, not a failure.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <p class="eyebrow">05 &middot; Method, in brief</p>
+  <h2>How the model works</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h3>1. Preprocessing</h3>
+      <p style="margin-bottom:0">
+        Both channels resampled to 250&nbsp;Hz, bandpass-filtered per-signal (ECG 0.5&ndash;40&nbsp;Hz, PPG
+        0.5&ndash;8&nbsp;Hz), z-normalized per window, and windowed to the 10&nbsp;s immediately preceding each
+        alarm trigger — anchored to the trigger's end, since Challenge&nbsp;2015 "short" records carry zero
+        signal after it.
+      </p>
+    </div>
+    <div class="card">
+      <h3>2. Dual CNN encoders</h3>
+      <p style="margin-bottom:0">
+        Two non-weight-shared 1D-CNN stacks (32&rarr;64&rarr;128 channels) — one per signal, since ECG and PPG
+        differ in morphology, frequency content, and failure mode. Each outputs a <em>sequence</em> of
+        feature vectors, not a pooled vector, so attention has a time axis to align.
+      </p>
+    </div>
+    <div class="card">
+      <h3>3. Cross-attention fusion</h3>
+      <p style="margin-bottom:0">
+        ECG features supply the queries, PPG features supply the keys/values, with positional encodings on
+        both. Every ECG timestep learns which PPG timestep to compare against — learning the pulse-transit
+        delay from data instead of assuming it's constant.
+      </p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3 style="margin-bottom:12px;">Dataset &amp; validation discipline</h3>
+    <div class="grid-3" style="gap:24px;">
+      <div><div class="stat-value" style="font-size:22px;">592&nbsp;/&nbsp;750</div><div class="stat-label">records kept after filtering to a usable PPG channel and sufficient window length</div></div>
+      <div><div class="stat-value" style="font-size:22px;">37.7%</div><div class="stat-label">positive class (true alarms) — handled via focal loss, not resampling</div></div>
+      <div><div class="stat-value" style="font-size:22px;">Record-wise</div><div class="stat-label">5-fold split — never window-wise, so no patient leaks across train/val</div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Built for the PhysioNet/CinC Challenge&nbsp;2015 dataset (750 public ICU alarm records) with an external
+      generalization check on MIMIC&nbsp;PERform&nbsp;AF (Charlton PH et al., <em>Physiological Measurement</em>
+      2022). Full pipeline, training code, and the reproducible <span class="mono">results.ipynb</span> report
+      live in the project repository — see <code class="inline">proposal.md</code>, <code class="inline">architecture.md</code>,
+      and <code class="inline">datasets.md</code> for the complete write-up.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
