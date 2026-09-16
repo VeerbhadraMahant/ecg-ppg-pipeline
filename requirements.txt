@@ -1,0 +1,10 @@
+numpy
+requests
+scipy
+pandas
+scikit-learn
+matplotlib
+torch
+wfdb
+pyyaml
+tqdm

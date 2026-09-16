@@ -1,0 +1,44 @@
+# Central configuration for the ECG+PPG fusion pipeline.
+# Values here are starting points, refined during cross-validation (see architecture.md).
+
+seed: 42
+
+paths:
+  raw_dir: data/raw/challenge2015
+  processed_dir: data/processed
+  external_dir: data/external/mimic_perform_af
+  checkpoints_dir: checkpoints
+  runs_dir: runs
+
+signal:
+  target_fs: 250              # Hz, matches PhysioNet 2015 native rate
+  window_seconds: 10          # seconds of signal per alarm window
+  ecg_band: [0.5, 40]         # Hz bandpass for ECG
+  ppg_band: [0.5, 8]          # Hz bandpass for PPG
+  filter_order: 4
+
+quality:
+  flatline_std_threshold: 0.01   # near-zero variance => flatline/disconnected lead
+  clip_fraction_threshold: 0.2   # fraction of samples at rail => saturated
+
+split:
+  n_folds: 5
+  record_wise: true
+
+model:
+  cnn_channels: [32, 64, 128]
+  cnn_kernel_sizes: [15, 9, 7]
+  cnn_pool: 2
+  dropout: 0.3
+  attn_heads: 4
+  attn_dim: 128
+  head_hidden: 64
+
+train:
+  batch_size: 16
+  epochs: 60
+  lr: 0.001
+  weight_decay: 0.0001
+  early_stop_patience: 10
+  loss: focal            # focal | weighted_bce
+  focal_gamma: 2.0

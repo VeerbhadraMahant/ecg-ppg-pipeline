@@ -1,0 +1,28 @@
+claude.md
+
+# Data (downloaded separately via scripts/download_data.py)
+data/raw/
+data/processed/
+data/external/
+*.zip
+*.dat
+*.hea
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Training artifacts
+runs/
+checkpoints/
+*.pt
+*.pth
+wandb/
+
+# OS
+.DS_Store
+Thumbs.db
