@@ -19,8 +19,15 @@ on an RTX 4060 laptop GPU.
 | **Cross-attention fusion** | 261,505 | **0.774 &plusmn; 0.046** | 0.797 &plusmn; 0.062 | 0.831 &plusmn; 0.109 | **0.866 &plusmn; 0.041** |
 
 Monotonic in the predicted direction (PPG-only < ECG-only < concat < cross-attention) at matched
-parameter count. External generalization check on MIMIC PERform AF (35 subjects, never trained on,
-a distribution-shifted transfer task): F1 = 0.642 &plusmn; 0.071.
+parameter count, and the cross-attention gain over concatenation is **statistically significant**
+(paired t-test on matched seed/fold F1, p = 0.041, n = 15). External generalization check on MIMIC
+PERform AF (35 subjects, never trained on, a distribution-shifted transfer task): F1 = 0.642 &plusmn; 0.071.
+
+Also reported per proposal.md's methodology: sensitivity/specificity/F1 broken down by all five
+alarm types (Tachycardia is high-sensitivity/low-specificity; Asystole and V-Fib/Flutter have too
+few true-alarm examples for their per-class numbers to be fully trusted), and inference speed
+alongside accuracy (all four variants run in under 10ms/window on the RTX 4060; cross-attention is
+the slowest at ~107 windows/sec, still comfortably real-time).
 
 Full write-up, charts, and the actual attention-weight visualizations: [`results.ipynb`](results.ipynb)
 and the [results dashboard](site/index.html) (`site/index.html`, open directly or serve the folder).

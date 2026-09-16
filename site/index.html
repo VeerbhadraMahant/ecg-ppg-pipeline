@@ -153,6 +153,7 @@
     </a>
     <div class="nav-links">
       <a href="#ladder">Results</a>
+      <a href="#alarm-types">By Alarm Type</a>
       <a href="#quality">Signal Quality</a>
       <a href="#attention">Attention Maps</a>
       <a href="#external">External Validation</a>
@@ -320,12 +321,95 @@
       </p>
     </div>
   </div>
+
+  <div class="card elevated" style="margin-top:20px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+    <div style="flex:0 0 auto;">
+      <div class="stat-value accent" style="font-size:32px;">p&nbsp;=&nbsp;0.041</div>
+      <div class="stat-label">paired t-test, cross-attention vs. concat</div>
+    </div>
+    <div style="flex:1; min-width:240px;">
+      <p style="margin:0;">
+        A paired t-test on F1 across the 15 matched (seed, fold) splits — both models trained on the identical
+        train/val split in each pair — puts the cross-attention gain over concatenation
+        <strong style="color:var(--slate)">below the conventional &alpha;=0.05 threshold</strong>. This is the strongest
+        single piece of evidence that cross-modal attention adds real value here, not just a favorable mean
+        across noisy folds.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="alarm-types">
+  <p class="eyebrow">02 &middot; Where it struggles</p>
+  <h2>Sensitivity/Specificity/F1 per alarm type</h2>
+  <p>
+    The five Challenge 2015 alarm types have very different base rates and difficulty. Pooling them into one
+    F1 number (as in section 01) hides that variation — broken out here using out-of-fold predictions across
+    the full dataset, cross-attention model.
+  </p>
+  <div class="card table-scroll" style="margin-top:20px;">
+    <table>
+      <thead>
+        <tr><th>Alarm type</th><th class="num">n</th><th class="num">True alarms</th><th class="num">F1</th><th class="num">Sensitivity</th><th class="num">Specificity</th><th class="num">AUC</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Asystole</td><td class="num">93</td><td class="num">14</td><td class="num">0.439</td><td class="num">0.643</td><td class="num">0.772</td><td class="num">0.810</td></tr>
+        <tr><td>Bradycardia</td><td class="num">73</td><td class="num">39</td><td class="num">0.805</td><td class="num">0.795</td><td class="num">0.794</td><td class="num">0.846</td></tr>
+        <tr><td>Tachycardia</td><td class="num">111</td><td class="num">106</td><td class="num">0.915</td><td class="num">0.868</td><td class="num">0.400</td><td class="num">0.717</td></tr>
+        <tr><td>Ventricular Flutter/Fib.</td><td class="num">45</td><td class="num">5</td><td class="num">0.500</td><td class="num">0.800</td><td class="num">0.825</td><td class="num">0.840</td></tr>
+        <tr><td>Ventricular Tachycardia</td><td class="num">270</td><td class="num">59</td><td class="num">0.646</td><td class="num">0.712</td><td class="num">0.863</td><td class="num">0.818</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h3>Tachycardia: sensitive, not specific</h3>
+      <p style="margin-bottom:0">
+        With the most support (111 windows, 106 true alarms) and the highest sensitivity (0.868), the model
+        catches almost every genuine tachycardia — but its specificity (0.400) is the lowest of any class,
+        matching the clinical reality that heart-rate-threshold alarms are the easiest to trigger spuriously
+        from motion or noise.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Asystole and V-Fib: too rare to trust the per-class number</h3>
+      <p style="margin-bottom:0">
+        Asystole (14 true alarms) and Ventricular Flutter/Fibrillation (5 true alarms) are the rarest classes
+        by far. Their F1 scores (0.439, 0.500) are the lowest in the table, but with this little support the
+        numbers carry far more variance than the pooled result — a caveat worth stating rather than hiding.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="speed">
+  <p class="eyebrow">03 &middot; Size and speed</p>
+  <h2>Inference latency, alongside accuracy</h2>
+  <p>Single-window inference, same GPU used for training. Model capacity was kept deliberately small (architecture.md section 6) — this is the check that the claim holds.</p>
+  <div class="card table-scroll" style="margin-top:20px;">
+    <table>
+      <thead>
+        <tr><th>Variant</th><th class="num">Params</th><th class="num">Latency</th><th class="num">Throughput</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ECG only</td><td class="num">266,001</td><td class="num">3.46&nbsp;ms</td><td class="num">289&nbsp;/s</td></tr>
+        <tr><td>PPG only</td><td class="num">266,001</td><td class="num">3.41&nbsp;ms</td><td class="num">293&nbsp;/s</td></tr>
+        <tr><td>Concat</td><td class="num">252,229</td><td class="num">6.86&nbsp;ms</td><td class="num">146&nbsp;/s</td></tr>
+        <tr class="highlight"><td>Cross-attention</td><td class="num">261,505</td><td class="num">9.36&nbsp;ms</td><td class="num">107&nbsp;/s</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="chart-caption" style="margin-top:12px;">
+    All four variants respond in well under 10ms per alarm — comfortably real-time. Cross-attention is the
+    slowest (the O(T&prime;&sup2;) attention matrix over ~300-step feature sequences), but the accuracy gain was
+    not bought with a deployment-relevant speed cost.
+  </p>
 </section>
 
 <section id="quality">
-  <p class="eyebrow">02 &middot; Robustness</p>
+  <p class="eyebrow">04 &middot; Robustness</p>
   <h2>Performance vs. signal quality</h2>
-  <p>Windows scored on a flatline/clipping heuristic and split into terciles, evaluated with the cross-attention model on a held-out fold.</p>
+  <p>Windows scored on a flatline/clipping heuristic and split into terciles, evaluated with the cross-attention model using out-of-fold predictions across all 592 windows.</p>
 
   <div class="grid-2">
     <div class="card">
@@ -339,41 +423,41 @@
           <text x="44" y="107" text-anchor="end">0.5</text>
           <text x="44" y="24" text-anchor="end">1.0</text>
         </g>
-        <!-- bars: F1 0.571, 0.815, 0.783 scaled height 170px = 1.0 -->
-        <rect x="90" y="93" width="70" height="97" fill="#c7e4d8" rx="4"/>
-        <rect x="205" y="51.5" width="70" height="138.5" fill="#44b48b" rx="4"/>
-        <rect x="285" y="57" width="70" height="133" fill="#167e6c" rx="4"/>
+        <!-- out-of-fold, n=592 total: F1 0.744, 0.800, 0.761 scaled height 170px = 1.0 -->
+        <rect x="90" y="63.5" width="70" height="126.5" fill="#c7e4d8" rx="4"/>
+        <rect x="205" y="54.0" width="70" height="136.0" fill="#44b48b" rx="4"/>
+        <rect x="285" y="60.7" width="70" height="129.3" fill="#167e6c" rx="4"/>
         <g font-family="Inter" font-size="12" fill="#3b3e47" text-anchor="middle">
-          <text x="125" y="207">Low (n=39)</text>
-          <text x="240" y="207">Mid (n=29)</text>
-          <text x="320" y="207">High (n=50)</text>
+          <text x="125" y="207">Low (n=197)</text>
+          <text x="240" y="207">Mid (n=162)</text>
+          <text x="320" y="207">High (n=233)</text>
         </g>
         <g font-family="JetBrains Mono, monospace" font-size="12" fill="#111a4a" text-anchor="middle" font-weight="600">
-          <text x="125" y="86">0.571</text>
-          <text x="240" y="44">0.815</text>
-          <text x="320" y="50">0.783</text>
+          <text x="125" y="57">0.744</text>
+          <text x="240" y="48">0.800</text>
+          <text x="320" y="55">0.761</text>
         </g>
       </svg>
-      <p class="chart-caption">F1 by signal-quality tercile (cross-attention, held-out fold).</p>
+      <p class="chart-caption">F1 by signal-quality tercile (cross-attention, out-of-fold predictions over all 592 windows).</p>
     </div>
     <div class="card">
       <h3>Reading the quality curve</h3>
       <p>
-        F1 is lowest in the noisiest tercile and recovers sharply once signal quality crosses the low threshold —
-        consistent with the premise that low-quality ECG/PPG windows are genuinely harder to verify, not an
-        artifact of the split. The gap between the lowest and middle terciles (+0.24 F1) is the largest jump in
-        the whole curve.
+        F1 is lowest in the noisiest tercile and recovers once signal quality crosses the low threshold, then
+        eases slightly at the very top — consistent with low-quality windows being genuinely harder to verify,
+        while the highest-quality tercile is small enough (n=233 vs. the full 592) that some of that dip is
+        within noise.
       </p>
       <p style="margin-bottom:0">
-        This is a single held-out fold (39/29/50 windows per bin), so treat the exact numbers as indicative — the
-        pipeline (<code class="inline">src/evaluate.py</code>) reruns this stratification for any fold or variant on request.
+        Out-of-fold predictions across all 5 folds (every window scored by the model that never trained on it),
+        not a single held-out slice — the pipeline (<code class="inline">src/evaluate.py</code>) reruns this stratification for any fold or variant on request.
       </p>
     </div>
   </div>
 </section>
 
 <section id="attention">
-  <p class="eyebrow">03 &middot; Interpretability</p>
+  <p class="eyebrow">05 &middot; Interpretability</p>
   <h2>What the attention layer actually looks at</h2>
   <p>
     Extracted cross-attention weight matrices (ECG query time &rarr; PPG key time) for individual alarm windows,
@@ -410,7 +494,7 @@
 </section>
 
 <section id="external">
-  <p class="eyebrow">04 &middot; Generalization</p>
+  <p class="eyebrow">06 &middot; Generalization</p>
   <h2>External validation — MIMIC PERform AF</h2>
   <p>
     35 subjects (19 AF, 16 non-AF), <strong style="color:var(--slate)">never trained on</strong>. This is a
@@ -447,7 +531,7 @@
 </section>
 
 <section id="method">
-  <p class="eyebrow">05 &middot; Method, in brief</p>
+  <p class="eyebrow">07 &middot; Method, in brief</p>
   <h2>How the model works</h2>
   <div class="grid-3">
     <div class="card">

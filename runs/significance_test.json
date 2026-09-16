@@ -1,0 +1,8 @@
+{
+  "variant_a": "concat",
+  "variant_b": "cross_attention",
+  "n_pairs": 15,
+  "mean_diff": 0.024157412327935557,
+  "t_stat": 2.254058027914218,
+  "p_value": 0.040740890710053254
+}
