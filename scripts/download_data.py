@@ -14,7 +14,10 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 
-CHALLENGE2015_URL = "https://www.physionet.org/content/challenge-2015/1.0.0/training.zip"
+# Note: the www.physionet.org/content/... URL from datasets.md serves an HTML
+# landing page, not the raw file. The files.physionet.org mirror serves the
+# zip directly.
+CHALLENGE2015_URL = "https://physionet.org/files/challenge-2015/1.0.0/training.zip"
 CHALLENGE2015_DIR = ROOT / "data" / "raw" / "challenge2015"
 
 MIMIC_AF_URL = "https://zenodo.org/records/15906524/files/mimic_perform_af_csv.zip?download=1"
