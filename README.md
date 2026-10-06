@@ -5,7 +5,7 @@ arrhythmia alarms better than giving it only one signal? See [proposal.md](propo
 the full problem statement, [architecture.md](architecture.md) for the model design, and
 [datasets.md](datasets.md) for data sources.
 
-## What this project actually does
+## What this project actually does:
 
 ICU bedside monitors trigger an audible alarm whenever a patient's vital signs cross a
 dangerous threshold (e.g. heart rate too low, no heartbeat detected). In practice, the large
