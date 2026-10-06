@@ -1,0 +1,118 @@
+{
+  "n_records": 592,
+  "n_seeds": 10,
+  "persist_threshold": 0.8,
+  "stable_threshold": 0.2,
+  "predictability_cv_auc": {
+    "gbm_features": {
+      "FN": {
+        "n": 223,
+        "n_err": 29,
+        "auc": 0.7407013045434099,
+        "auc_sd": 0.09291953971474425
+      },
+      "FP": {
+        "n": 369,
+        "n_err": 20,
+        "auc": 0.8165962732919254,
+        "auc_sd": 0.07898614814313602
+      }
+    },
+    "resnet1d": {
+      "FN": {
+        "n": 223,
+        "n_err": 27,
+        "auc": 0.7967384615384614,
+        "auc_sd": 0.09251806331913973
+      },
+      "FP": {
+        "n": 369,
+        "n_err": 11,
+        "auc": 0.7218974960876371,
+        "auc_sd": 0.16159347564484214
+      }
+    },
+    "cross_attention": {
+      "FN": {
+        "n": 223,
+        "n_err": 32,
+        "auc": 0.8027893451577662,
+        "auc_sd": 0.07811660902567716
+      },
+      "FP": {
+        "n": 369,
+        "n_err": 38,
+        "auc": 0.814633407637139,
+        "auc_sd": 0.06645975239598959
+      }
+    },
+    "ecg_only": {
+      "FN": {
+        "n": 223,
+        "n_err": 39,
+        "auc": 0.7974048155298155,
+        "auc_sd": 0.10327240667169893
+      },
+      "FP": {
+        "n": 369,
+        "n_err": 61,
+        "auc": 0.7827191216152083,
+        "auc_sd": 0.05799698474917429
+      }
+    },
+    "ppg_only": {
+      "FN": {
+        "n": 223,
+        "n_err": 22,
+        "auc": 0.8043158536585366,
+        "auc_sd": 0.08092100466586691
+      },
+      "FP": {
+        "n": 369,
+        "n_err": 156,
+        "auc": 0.9272474591862252,
+        "auc_sd": 0.02219082230163716
+      }
+    }
+  },
+  "shared_unique": {
+    "all5_majority_wrong": 17,
+    "all5_majority_wrong_FN": 8,
+    "all5_majority_wrong_FP": 9,
+    "all5_persistent_wrong": 6,
+    "unique_to_proposed(majority; others<0.5)": 6,
+    "unique_to_proposed_FN": 6,
+    "unique_to_proposed_FP": 0,
+    "unique_to_gbm(majority; others<0.5)": 10,
+    "proposed_majority_wrong": 142,
+    "gbm_majority_wrong": 85,
+    "proposed_wrong_and_gbm_right": 91,
+    "gbm_wrong_and_proposed_right": 34,
+    "ecgonly_ppgonly_both_majority_wrong": 50,
+    "proposed_wrong_but_a_unimodal_right": 99,
+    "jaccard_persistent_FN_gbm_vs_xattn": 0.2978723404255319,
+    "jaccard_persistent_FP_gbm_vs_xattn": 0.13725490196078433
+  },
+  "n_persistent_sets": {
+    "gbm_features": {
+      "FN": 29,
+      "FP": 20
+    },
+    "resnet1d": {
+      "FN": 27,
+      "FP": 11
+    },
+    "cross_attention": {
+      "FN": 32,
+      "FP": 38
+    },
+    "ecg_only": {
+      "FN": 39,
+      "FP": 61
+    },
+    "ppg_only": {
+      "FN": 22,
+      "FP": 156
+    }
+  }
+}

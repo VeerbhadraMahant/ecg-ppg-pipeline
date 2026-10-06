@@ -1,0 +1,50 @@
+
+=== Comparison (test folds; thresholds for @s* chosen on inner validation) ===
+              variant  params Accuracy              F1     Sensitivity     Specificity             AUC ChallengeScore FA_suppressed@s95 realised_sens@s95 FA_suppressed@s99 realised_sens@s99 FA_suppressed@s100 realised_sens@s100
+             ecg_only  261055    0.824 0.709 +/- 0.029 0.769 +/- 0.071 0.845 +/- 0.029 0.897 +/- 0.008           65.7             0.640             0.947             0.368             0.988              0.275              0.991
+             ppg_only  261055    0.693 0.566 +/- 0.027 0.712 +/- 0.071 0.685 +/- 0.079 0.751 +/- 0.014           52.4             0.188             0.982             0.102             0.999              0.064              1.000
+               concat  256333    0.837 0.744 +/- 0.013 0.838 +/- 0.028 0.837 +/- 0.021 0.909 +/- 0.008           70.9             0.601             0.958             0.349             0.990              0.227              0.992
+      cross_attention  261505    0.844 0.746 +/- 0.013 0.813 +/- 0.044 0.857 +/- 0.030 0.915 +/- 0.012           69.9             0.623             0.965             0.290             0.995              0.193              0.998
+   bi_cross_attention  266463    0.857 0.775 +/- 0.019 0.878 +/- 0.028 0.848 +/- 0.027 0.933 +/- 0.008           75.4             0.665             0.953             0.438             0.985              0.319              0.997
+gated_cross_attention  258595    0.841 0.758 +/- 0.008 0.887 +/- 0.015 0.823 +/- 0.012 0.922 +/- 0.004           74.6             0.631             0.963             0.436             0.990              0.327              0.992
+             resnet1d  277649    0.852 0.750 +/- 0.023 0.792 +/- 0.045 0.876 +/- 0.013 0.915 +/- 0.010           69.2             0.654             0.945             0.328             0.985              0.197              0.990
+                  tcn  267492    0.856 0.760 +/- 0.020 0.813 +/- 0.052 0.873 +/- 0.023 0.919 +/- 0.011           70.9             0.725             0.925             0.357             0.985              0.126              0.990
+
+=== Per alarm type (cross_attention, out-of-fold, pooled over seeds) ===
+             alarm_type   n  n_true_alarms       F1  Sensitivity  Specificity      AUC  ChallengeScore
+Ventricular_Tachycardia 427            120 0.746177     0.813333     0.856678 0.911284       69.802555
+
+=== Per-type false-alarm suppression at fixed sensitivity (cross_attention) ===
+        variant              alarm_type operating_point  sensitivity  false_alarms_suppressed  n_true  n_false
+cross_attention Ventricular_Tachycardia            s100     0.998333                 0.192834     600     1535
+cross_attention Ventricular_Tachycardia             s95     0.965000                 0.622801     600     1535
+cross_attention Ventricular_Tachycardia             s99     0.995000                 0.289902     600     1535
+
+=== Performance vs signal quality (cross_attention) ===
+ quality_bin   n       F1  Sensitivity  Specificity
+           0 163 0.743494     0.851064     0.822414
+           1 126 0.752887     0.758140     0.867470
+           2 138 0.741840     0.833333     0.885185
+
+=== Model size / inference speed ===
+              variant  params  latency_ms  throughput_per_sec
+             ecg_only  261055    0.785382         1273.266082
+             ppg_only  261055    0.736709         1357.388721
+               concat  256333    1.208098          827.747463
+      cross_attention  261505    1.248074          801.234813
+   bi_cross_attention  266463    1.614347          619.445700
+gated_cross_attention  258595    1.576846          634.177481
+             resnet1d  277649    1.465435          682.391222
+                  tcn  267492    1.460605          684.647956
+
+=== Pre-registered comparisons (Nadeau-Bengio + record bootstrap, Holm-corrected) ===
+       baseline            challenger  n_pairs  f1_mean_diff      nb_t     nb_p  boot_diff[f1@t50]  boot_ci[f1@t50]  boot_p[f1@t50]  boot_diff[challenge_score@t50] boot_ci[challenge_score@t50]  boot_p[challenge_score@t50]  boot_diff[specificity@s95] boot_ci[specificity@s95]  boot_p[specificity@s95]  nb_p_holm  boot_p[f1@t50]_holm  boot_p[challenge_score@t50]_holm  boot_p[specificity@s95]_holm
+         concat       cross_attention        5      0.002607  0.299944 0.779161           0.002607 [-0.041, +0.045]          0.9192                       -1.006637             [-6.792, +4.759]                       0.7252                    0.022150         [-0.015, +0.061]                   0.2452   1.000000               1.0000                            1.0000                        0.9808
+       ecg_only       cross_attention        5      0.043384  3.396388 0.027368           0.037099 [-0.005, +0.082]          0.0856                        4.232280             [-0.937, +9.458]                       0.1052                   -0.017590         [-0.057, +0.023]                   0.3864   0.218946               0.4280                            0.4208                        1.0000
+       ppg_only       cross_attention        5      0.188040 12.147025 0.000264           0.180252 [+0.125, +0.239]          0.0000                       17.549996           [+10.931, +24.347]                       0.0000                    0.435179         [+0.390, +0.483]                   0.0000   0.002372               0.0000                            0.0000                        0.0000
+       ecg_only                concat        5      0.040777  2.249100 0.087733           0.034493 [+0.007, +0.063]          0.0120                        5.238917             [+1.822, +8.817]                       0.0016                   -0.039739         [-0.066, -0.014]                   0.0020   0.438663               0.0960                            0.0096                        0.0120
+cross_attention    bi_cross_attention        5      0.029187  3.009692 0.039562           0.029187 [+0.005, +0.054]          0.0156                        5.500533             [+2.490, +8.654]                       0.0000                    0.042345         [+0.016, +0.068]                   0.0008   0.237374               0.1008                            0.0000                        0.0056
+cross_attention gated_cross_attention        5      0.012159  1.005799 0.371418           0.012159 [-0.013, +0.037]          0.3384                        4.728223             [+1.884, +7.725]                       0.0008                    0.008469         [-0.017, +0.034]                   0.5528   1.000000               1.0000                            0.0056                        1.0000
+       ecg_only              resnet1d        5      0.047054  3.367151 0.028118           0.040769 [+0.007, +0.074]          0.0144                        3.503346             [-0.354, +7.136]                       0.0800                    0.013681         [-0.015, +0.043]                   0.3496   0.218946               0.1008                            0.4000                        1.0000
+       resnet1d       cross_attention        5     -0.003670 -0.315969 0.767826          -0.003670 [-0.044, +0.035]          0.8632                        0.728934             [-4.028, +5.416]                       0.7568                   -0.031270         [-0.068, +0.005]                   0.1060   1.000000               1.0000                            1.0000                        0.5300
+            tcn       cross_attention        5     -0.014018 -0.731439 0.505054          -0.014018 [-0.054, +0.026]          0.5044                       -1.037512             [-6.062, +3.966]                       0.7024                   -0.102280         [-0.142, -0.063]                   0.0000   1.000000               1.0000                            1.0000                        0.0000

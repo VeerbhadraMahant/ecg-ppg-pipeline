@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Streaming Replay - ECG+PPG Fusion</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16202a;--mut:#5b6773;--line:#dde2e8;--ecg:#0b7a4b;--ppg:#c2410c;--acc:#2563eb;--ok:#0b7a4b;--bad:#b91c1c;--grid:#eef1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#171e26;--ink:#e6ebf0;--mut:#93a0ad;--line:#2a343f;--ecg:#4ade80;--ppg:#fb923c;--acc:#60a5fa;--ok:#4ade80;--bad:#f87171;--grid:#1f2830}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+a{color:var(--acc)}
+h1{font-size:1.35rem;margin:.2em 0}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.card h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 8px;font-weight:600}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>.card{flex:1 1 300px;margin-bottom:12px}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,select{font:inherit;padding:6px 12px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+canvas{width:100%;display:block}
+#sig{height:230px}
+#gauge{height:70px}
+#heat{height:34px}
+.bars div.b{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.85rem}
+.bars .lab{width:42px;color:var(--mut)}
+.bars .track{flex:1;height:12px;background:var(--grid);border-radius:6px;overflow:hidden}
+.bars .fill{height:100%;width:0;border-radius:6px}
+.bars .val{width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.big{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:600;border:1px solid var(--line)}
+.reveal{display:none;margin-top:8px;padding:8px 10px;border-radius:8px;font-weight:600}
+.reveal.show{display:block}
+.reveal.ok{background:rgba(11,122,75,.14);color:var(--ok)}
+.reveal.bad{background:rgba(185,28,28,.13);color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+td,th{padding:4px 6px;text-align:left;border-bottom:1px solid var(--grid)}
+th{color:var(--mut);font-weight:600}
+.note{color:var(--mut);font-size:.8rem;margin:6px 0 0}
+input[type=range]{flex:1;min-width:160px}
+.err{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="sub"><a href="index.html">&larr; Back to results dashboard</a></p>
+<h1>Streaming replay: how the verdict forms as the alarm window fills</h1>
+<p class="sub">The cross-attention model re-evaluated every second on the last <i>k</i> seconds of the 10 s alarm window (left zero-padded). The alarm fires at the end of the window; the verdict at 10 s is the one the offline results report. Test windows only (record held out from the model that scores it).</p>
+
+<div id="fail" class="card err" style="display:none">replay_data.js not found. Run <code>python scripts/build_replay_data.py</code> and keep <code>assets/replay_data.js</code> next to this page.</div>
+
+<div class="card ctl">
+  <label>Record <select id="rec"></select></label>
+  <button id="play" class="primary">Play</button>
+  <button id="restart">Restart</button>
+  <label>Speed <select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x (real time)</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option></select></label>
+  <input type="range" id="scrub" min="0" max="10" step="0.01" value="0" aria-label="Time">
+  <span id="clock" style="font-variant-numeric:tabular-nums;min-width:90px">0.0 / 10.0 s</span>
+</div>
+
+<div class="card"><h2>Live signals (scrolling, last 6 s)</h2>
+  <canvas id="sig"></canvas>
+  <p class="note"><span style="color:var(--ecg)">&#9632;</span> ECG &nbsp; <span style="color:var(--ppg)">&#9632;</span> PPG &nbsp; (z-normalised, as seen by the model; downsampled to 125 Hz)</p>
+</div>
+
+<div class="row">
+  <div class="card"><h2>Verdict: P(true alarm)</h2>
+    <canvas id="gauge"></canvas>
+    <div><span class="big" id="pv">--</span> <span class="pill" id="pill">waiting</span></div>
+    <div class="note" id="pnote">Model needs at least 2 s of signal.</div>
+    <div id="reveal" class="reveal"></div>
+  </div>
+  <div class="card"><h2>Signal quality (last k s)</h2>
+    <div class="bars">
+      <div class="b"><span class="lab">ECG</span><span class="track"><span class="fill" id="qe" style="background:var(--ecg)"></span></span><span class="val" id="qev">--</span></div>
+      <div class="b"><span class="lab">PPG</span><span class="track"><span class="fill" id="qp" style="background:var(--ppg)"></span></span><span class="val" id="qpv">--</span></div>
+    </div>
+    <h2 style="margin-top:14px">Attention: where ECG looks in the PPG</h2>
+    <canvas id="heat"></canvas>
+    <div class="note">Window time 0 to 10 s. Brighter = more ECG-to-PPG attention mass, averaged over ECG queries, normalised per frame. Hatched = zero padding (not yet observed).</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="card"><h2>Verdict history</h2><canvas id="hist" style="height:110px"></canvas>
+    <div class="note">Probability at k = 2..10 s. Early values are out-of-distribution (training used full 10 s windows only); do not read them as calibrated.</div></div>
+  <div class="card"><h2>Inference latency (one 10 s window, batch 1)</h2>
+    <table id="lat"></table>
+    <p class="note" id="latnote"></p></div>
+</div>
+</div>
+<script src="assets/replay_data.js" onerror="document.getElementById('fail').style.display='block'"></script>
+<script>
+(function(){
+"use strict";
+var D = window.REPLAY_DATA;
+if(!D){return;}
+var $=function(i){return document.getElementById(i);};
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+var recs=D.records, FS=D.meta.fs, KS=D.meta.ks, THR=D.meta.threshold, WIN=D.meta.window_s;
+var cur=0, t=0, playing=false, last=null, revealed=false;
+var typeName=function(s){return s.replace(/_/g,' ');};
+recs.forEach(function(r,i){
+  var o=document.createElement('option');
+  o.value=i;o.textContent=r.record_id+' - '+typeName(r.alarm_type);
+  $('rec').appendChild(o);
+});
+
+function fitCanvas(c){
+  var dpr=window.devicePixelRatio||1, w=c.clientWidth, h=c.clientHeight;
+  if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}
+  var g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return {g:g,w:w,h:h};
+}
+function stats(a){var mn=Infinity,mx=-Infinity;for(var i=0;i<a.length;i++){if(a[i]<mn)mn=a[i];if(a[i]>mx)mx=a[i];}return [mn,mx];}
+
+var ranges=[];
+function setRec(i){
+  cur=i;var r=recs[i];
+  ranges=[robust(r.ecg),robust(r.ppg)];
+  t=0;revealed=false;$('reveal').className='reveal';$('reveal').textContent='';
+  draw();
+}
+function robust(a){var s=a.slice().sort(function(x,y){return x-y;});var lo=s[Math.floor(s.length*0.01)],hi=s[Math.floor(s.length*0.99)];var p=(hi-lo)*0.1||1;return [lo-p,hi+p];}
+
+function kIndex(time){var k=Math.floor(time+1e-9);if(k<KS[0])return -1;return Math.min(k,KS[KS.length-1])-KS[0];}
+
+function drawSignals(){
+  var c=fitCanvas($('sig')),g=c.g,w=c.w,h=c.h,r=recs[cur],VIEW=6;
+  g.clearRect(0,0,w,h);
+  g.strokeStyle=css('--grid');g.lineWidth=1;g.fillStyle=css('--mut');g.font='11px system-ui';
+  for(var s=0;s<=VIEW;s++){var x=Math.round(s/VIEW*w)+.5;g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();}
+  var lanes=[[r.ecg,ranges[0],css('--ecg'),0],[r.ppg,ranges[1],css('--ppg'),1]],lh=h/2;
+  var t0=t-VIEW;
+  lanes.forEach(function(L){
+    var a=L[0],rg=L[1],y0=L[3]*lh+6,hh=lh-12;
+    g.strokeStyle=L[2];g.lineWidth=1.5;g.beginPath();var started=false;
+    var iStart=Math.max(0,Math.floor(t0*FS)),iEnd=Math.min(a.length-1,Math.floor(t*FS));
+    for(var i=iStart;i<=iEnd;i++){
+      var x=((i/FS)-t0)/VIEW*w;
+      var v=Math.min(rg[1],Math.max(rg[0],a[i]));
+      var y=y0+hh-(v-rg[0])/(rg[1]-rg[0])*hh;
+      if(!started){g.moveTo(x,y);started=true;}else g.lineTo(x,y);
+    }
+    g.stroke();
+  });
+  // observed-window boundary: signal before (10-k) s is zero-padded to the model
+  var ki=kIndex(t);
+  if(ki>=0){var padEnd=WIN-KS[ki];var xp=(padEnd-t0)/VIEW*w;if(xp>0){g.fillStyle='rgba(120,120,120,.15)';g.fillRect(0,0,Math.min(xp,w),h);}}
+  g.fillStyle=css('--mut');g.fillText('t = '+t.toFixed(1)+' s (alarm fires at 10 s)',8,12);
+  g.fillText('shaded: outside the last-k-seconds the model sees',8,h-4);
+  // alarm marker
+  var xa=(WIN-t0)/VIEW*w;if(xa>=0&&xa<=w){g.strokeStyle=css('--bad');g.setLineDash([5,4]);g.beginPath();g.moveTo(xa,0);g.lineTo(xa,h);g.stroke();g.setLineDash([]);}
+}
+
+function drawGauge(p){
+  var c=fitCanvas($('gauge')),g=c.g,w=c.w,h=c.h,pad=10,bw=w-2*pad,by=24,bh=18;
+  g.clearRect(0,0,w,h);
+  var gr=g.createLinearGradient(pad,0,pad+bw,0);gr.addColorStop(0,'#16a34a');gr.addColorStop(.5,'#eab308');gr.addColorStop(1,'#dc2626');
+  g.fillStyle=gr;g.globalAlpha=.35;g.fillRect(pad,by,bw,bh);g.globalAlpha=1;
+  g.fillStyle=css('--mut');g.font='11px system-ui';
+  g.fillText('false alarm',pad,14);g.textAlign='right';g.fillText('true alarm',pad+bw,14);g.textAlign='center';g.fillText('0.5',pad+bw*THR,14);g.textAlign='left';
+  g.strokeStyle=css('--ink');g.lineWidth=2;g.beginPath();g.moveTo(pad+bw*THR,by-4);g.lineTo(pad+bw*THR,by+bh+4);g.stroke();
+  if(p!==null){var x=pad+bw*p;g.fillStyle=css('--ink');g.beginPath();g.moveTo(x,by+bh+2);g.lineTo(x-7,by+bh+14);g.lineTo(x+7,by+bh+14);g.closePath();g.fill();
+    g.fillRect(x-2,by-2,4,bh+4);}
+  g.fillStyle=css('--mut');g.fillText('0',pad,h-2);g.textAlign='right';g.fillText('1',pad+bw,h-2);g.textAlign='left';
+}
+
+function drawHeat(ki){
+  var c=fitCanvas($('heat')),g=c.g,w=c.w,h=c.h,r=recs[cur],n=D.meta.attn_bins;
+  g.clearRect(0,0,w,h);var bw=w/n;
+  var acc=css('--acc');
+  for(var b=0;b<n;b++){
+    var tb=(b+.5)*WIN/n;
+    if(ki<0){g.fillStyle=css('--grid');g.fillRect(b*bw,0,bw+.5,h);continue;}
+    var padEnd=WIN-KS[ki];
+    if(tb<padEnd){g.fillStyle=css('--grid');g.fillRect(b*bw,0,bw+.5,h);
+      g.strokeStyle=css('--line');g.beginPath();g.moveTo(b*bw,h);g.lineTo(b*bw+bw,0);g.stroke();continue;}
+    var v=r.attn[ki][b];g.globalAlpha=0.08+0.92*Math.min(1,Math.max(0,v));g.fillStyle=acc;g.fillRect(b*bw,0,bw+.5,h);g.globalAlpha=1;
+  }
+  g.strokeStyle=css('--ink');g.lineWidth=1;g.strokeRect(0.5,0.5,w-1,h-1);
+}
+
+function drawHist(ki){
+  var c=fitCanvas($('hist')),g=c.g,w=c.w,h=c.h,r=recs[cur],px=28,py=8;
+  g.clearRect(0,0,w,h);
+  g.strokeStyle=css('--grid');g.fillStyle=css('--mut');g.font='11px system-ui';g.lineWidth=1;
+  var X=function(k){return px+(k-KS[0])/(KS[KS.length-1]-KS[0])*(w-px-10);},Y=function(p){return py+(1-p)*(h-py-16);};
+  [0,.5,1].forEach(function(p){g.beginPath();g.moveTo(px,Y(p));g.lineTo(w-6,Y(p));g.stroke();g.fillText(String(p),2,Y(p)+4);});
+  KS.forEach(function(k){g.fillText(k+'s',X(k)-8,h-3);});
+  g.strokeStyle=css('--acc');g.lineWidth=2;g.beginPath();
+  for(var i=0;i<=ki;i++){var x=X(KS[i]),y=Y(r.prob[i]);if(i===0)g.moveTo(x,y);else g.lineTo(x,y);}
+  g.stroke();g.fillStyle=css('--acc');
+  for(var j=0;j<=ki;j++){g.beginPath();g.arc(X(KS[j]),Y(r.prob[j]),3,0,6.3);g.fill();}
+}
+
+function update(){
+  var r=recs[cur],ki=kIndex(t);
+  $('clock').textContent=t.toFixed(1)+' / '+WIN.toFixed(1)+' s';
+  $('scrub').value=t;
+  drawSignals();
+  if(ki<0){
+    $('pv').textContent='--';$('pill').textContent='waiting';$('pnote').textContent='Model needs at least 2 s of signal.';
+    drawGauge(null);setBar('qe','qev',null);setBar('qp','qpv',null);
+  }else{
+    var p=r.prob[ki];$('pv').textContent=p.toFixed(2);
+    var pos=p>=THR;$('pill').textContent=pos?'TRUE alarm':'FALSE alarm';
+    $('pill').style.color=pos?css('--bad'):css('--ok');
+    $('pnote').textContent='Using last '+KS[ki]+' s of signal (threshold '+THR+').';
+    drawGauge(p);setBar('qe','qev',r.ecg_quality[ki]);setBar('qp','qpv',r.ppg_quality[ki]);
+  }
+  drawHeat(ki);drawHist(ki);
+  if(t>=WIN-1e-6&&!revealed){revealed=true;
+    var pred=r.prob[r.prob.length-1]>=THR?1:0,truth=r.label,ok=pred===truth;
+    var el=$('reveal');el.className='reveal show '+(ok?'ok':'bad');
+    el.textContent='Ground truth: '+(truth?'TRUE alarm':'FALSE alarm')+' - model said '+(pred?'TRUE':'FALSE')+' ('+(ok?'correct':'wrong')+')';
+  }else if(t<WIN-1e-6&&revealed){revealed=false;$('reveal').className='reveal';}
+}
+function setBar(f,v,x){$(f).style.width=x===null?'0%':(x*100)+'%';$(v).textContent=x===null?'--':x.toFixed(2);}
+function draw(){update();}
+
+function tick(ts){
+  if(!playing){return;}
+  if(last===null)last=ts;
+  var dt=(ts-last)/1000;last=ts;
+  t=Math.min(WIN,t+dt*parseFloat($('speed').value));
+  update();
+  if(t>=WIN){playing=false;$('play').textContent='Play';last=null;return;}
+  requestAnimationFrame(tick);
+}
+function setPlaying(p){
+  playing=p;$('play').textContent=p?'Pause':'Play';last=null;
+  if(p){if(t>=WIN)t=0;requestAnimationFrame(tick);}
+}
+$('play').onclick=function(){setPlaying(!playing);};
+$('restart').onclick=function(){t=0;setPlaying(true);};
+$('rec').onchange=function(){setPlaying(false);setRec(parseInt(this.value,10));};
+$('scrub').oninput=function(){t=parseFloat(this.value);update();};
+window.addEventListener('resize',draw);
+
+// latency panel
+(function(){
+  var L=D.latency,rows=[];
+  function row(n,o,extra){rows.push('<tr><td>'+n+'</td><td>'+(o&&o.median_ms!==undefined?o.median_ms.toFixed(2)+' ms':'n/a')+'</td><td>'+(o&&o.p95_ms!==undefined?o.p95_ms.toFixed(2)+' ms':'')+'</td></tr>');}
+  rows.push('<tr><th>Path</th><th>median</th><th>p95</th></tr>');
+  row('CPU fp32 ('+L.cpu_threads+' threads)',L.cpu_fp32);
+  row('CPU int8 (Linear only)',L.cpu_int8_dynamic);
+  if(L.gpu_fp32)row('GPU fp32 ('+(L.gpu_name||'cuda')+')',L.gpu_fp32);
+  $('lat').innerHTML=rows.join('');
+  var n='Median/p95 over '+L.cpu_fp32.n_runs+' runs after warm-up; GPU timed with cuda synchronize. int8 = torch dynamic quantization of nn.Linear layers only: the CNN encoders and the attention block stay fp32, so it gives little or no speedup at this model size (|dP| vs fp32 = '+L.int8_prob_abs_diff_vs_fp32+'). '+(L.gpu_note||'')+' Params: '+L.n_params.toLocaleString()+'.';
+  $('latnote').textContent=n;
+})();
+setRec(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+variant,alarm_type,operating_point,sensitivity,false_alarms_suppressed,n_true,n_false
+cross_attention,Ventricular_Tachycardia,s100,0.9983333333333333,0.19283387622149836,600,1535
+cross_attention,Ventricular_Tachycardia,s95,0.965,0.6228013029315961,600,1535
+cross_attention,Ventricular_Tachycardia,s99,0.995,0.2899022801302932,600,1535

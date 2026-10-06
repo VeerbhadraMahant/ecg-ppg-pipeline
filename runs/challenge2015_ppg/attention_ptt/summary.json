@@ -1,0 +1,15 @@
+{
+  "variant":"cross_attention",
+  "n_windows":592,
+  "n_windows_with_ptt":499,
+  "token_resolution_ms":32.0,
+  "window_level_spearman_rho(attn_lag, measured_PTT)":-0.0394682453,
+  "spearman_p":0.3789754958,
+  "permutation_p":0.3865,
+  "n_beats_pairs":6155,
+  "beat_level_spearman_rho":0.0173371809,
+  "attention_mass_in_physiological_lag_range":0.0529785607,
+  "mass_if_attention_were_uniform":0.0557507412,
+  "median_attn_lag_s":0.384,
+  "median_measured_ptt_s":0.368
+}

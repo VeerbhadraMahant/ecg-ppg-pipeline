@@ -1,0 +1,16 @@
+{
+  "variant": "concat",
+  "alpha_miss_target": 0.1,
+  "confidence": 0.9,
+  "folds_with_certified_threshold": "42/50",
+  "false_alarms_suppressed_pct": 22.54742547425474,
+  "true_alarms_missed_pct": 2.914798206278027,
+  "auto_suppressed_pct_of_alarms": 15.152027027027026,
+  "deferred_pct_of_alarms": 33.5472972972973,
+  "high_priority_pct_of_alarms": 51.30067567567568,
+  "true_rate_in_suppressed_pct": 7.246376811594203,
+  "true_rate_in_deferred_pct": 20.896273917421954,
+  "true_rate_in_high_priority_pct": 57.622653934804084,
+  "false_alarms_removed_per_100_alarms": 14.054054054054054,
+  "missed_true_alarms_per_1000_true": 29.14798206278027
+}

@@ -1,0 +1,29 @@
+{
+  "overall": {
+    "config": "mousavi_attn_cnn_rnn|aug1|focal|lr0.001",
+    "arch": "mousavi_attn_cnn_rnn",
+    "aug": 1,
+    "loss": "focal",
+    "lr": 0.001,
+    "n": 15,
+    "val_auc_ema": 0.9362115507315444,
+    "val_auc_ema_sd": 0.03684109041247435,
+    "val_auc_raw": 0.9412140299723947,
+    "epochs": 13.8,
+    "val_auc_ema_se": 0.00951232864157566
+  },
+  "deep_only": {
+    "config": "mousavi_attn_cnn_rnn|aug1|focal|lr0.001",
+    "arch": "mousavi_attn_cnn_rnn",
+    "aug": 1,
+    "loss": "focal",
+    "lr": 0.001,
+    "n": 15,
+    "val_auc_ema": 0.9362115507315444,
+    "val_auc_ema_sd": 0.03684109041247435,
+    "val_auc_raw": 0.9412140299723947,
+    "epochs": 13.8,
+    "val_auc_ema_se": 0.00951232864157566
+  },
+  "criterion": "mean inner-validation AUC of the EMA model at its best epoch, 3 seeds x 5 folds, CinC PPG cohort"
+}

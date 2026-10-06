@@ -1,0 +1,16 @@
+variant,alarm_type,operating_point,sensitivity,false_alarms_suppressed,n_true,n_false
+cross_attention,Asystole,s100,0.9071428571428571,0.27341772151898736,140,790
+cross_attention,Asystole,s95,0.8285714285714286,0.4481012658227848,140,790
+cross_attention,Asystole,s99,0.9071428571428571,0.27341772151898736,140,790
+cross_attention,Bradycardia,s100,0.9692307692307692,0.3735294117647059,390,340
+cross_attention,Bradycardia,s95,0.9230769230769231,0.5264705882352941,390,340
+cross_attention,Bradycardia,s99,0.9692307692307692,0.3735294117647059,390,340
+cross_attention,Tachycardia,s100,0.9820754716981132,0.18,1060,50
+cross_attention,Tachycardia,s95,0.9669811320754716,0.28,1060,50
+cross_attention,Tachycardia,s99,0.9820754716981132,0.18,1060,50
+cross_attention,Ventricular_Flutter_Fib,s100,0.98,0.1925,50,400
+cross_attention,Ventricular_Flutter_Fib,s95,0.82,0.3375,50,400
+cross_attention,Ventricular_Flutter_Fib,s99,0.98,0.1925,50,400
+cross_attention,Ventricular_Tachycardia,s100,0.9355932203389831,0.23270142180094786,590,2110
+cross_attention,Ventricular_Tachycardia,s95,0.8779661016949153,0.3739336492890995,590,2110
+cross_attention,Ventricular_Tachycardia,s99,0.9355932203389831,0.23270142180094786,590,2110

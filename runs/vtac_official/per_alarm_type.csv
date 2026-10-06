@@ -1,0 +1,2 @@
+alarm_type,n,n_true_alarms,F1,Sensitivity,Specificity,AUC,ChallengeScore
+Ventricular_Tachycardia,427,120,0.746177370030581,0.8133333333333334,0.8566775244299675,0.91128447339848,69.80255516840883

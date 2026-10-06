@@ -1,0 +1,553 @@
+{
+  "deepplus": {
+    "sensitivity_mean": 0.9333333333333332,
+    "sensitivity_std": 0.011785113019775782,
+    "specificity_mean": 0.9048859934853419,
+    "specificity_std": 0.006316195253962647,
+    "f1_mean": 0.8575919179076745,
+    "f1_std": 0.00814320942728919,
+    "auc_mean": 0.9658957654723126,
+    "auc_std": 0.0014825519382148772,
+    "variant": "deepplus",
+    "recipe": {
+      "arch": "mousavi_attn_cnn_rnn",
+      "aug": 1,
+      "loss": "focal",
+      "lr": 0.001,
+      "k": 3,
+      "mixup": 0.0,
+      "wd": 0.01,
+      "epochs": 20,
+      "patience": 6,
+      "batch": 64,
+      "label_smooth": 0.05,
+      "focal_gamma": 2.0,
+      "max_shift": 250,
+      "scale_sigma": 0.15,
+      "noise": 0.1,
+      "mod_drop": 0.3,
+      "feat_noise": 0.1,
+      "tta_shifts": [
+        -100,
+        -50,
+        0,
+        50,
+        100
+      ],
+      "ema_horizon_epochs": 3.0,
+      "feat_dim": 32
+    },
+    "fold_metrics": [
+      {
+        "sensitivity": 0.925,
+        "specificity": 0.9087947882736156,
+        "f1": 0.8571428571428571,
+        "auc": 0.9651194353963084,
+        "n": 427,
+        "n_pos": 120,
+        "tp": 111,
+        "fp": 28,
+        "tn": 279,
+        "fn": 9,
+        "challenge_score": 84.23326133909288,
+        "ops": {
+          "t50": {
+            "threshold": 0.5,
+            "tp": 111,
+            "fp": 28,
+            "tn": 279,
+            "fn": 9
+          },
+          "s95": {
+            "threshold": 0.3291274309158325,
+            "tp": 117,
+            "fp": 55,
+            "tn": 252,
+            "fn": 3
+          },
+          "s99": {
+            "threshold": 0.20188124477863312,
+            "tp": 117,
+            "fp": 81,
+            "tn": 226,
+            "fn": 3
+          },
+          "s100": {
+            "threshold": 0.07760075479745865,
+            "tp": 120,
+            "fp": 174,
+            "tn": 133,
+            "fn": 0
+          }
+        },
+        "params": 258857,
+        "seed": 0,
+        "fold": 0,
+        "train_seconds": 45.37622690200806,
+        "n_train": 3662,
+        "n_test": 427,
+        "recipe": {
+          "arch": "mousavi_attn_cnn_rnn",
+          "aug": 1,
+          "loss": "focal",
+          "lr": 0.001,
+          "k": 3,
+          "mixup": 0.0,
+          "wd": 0.01,
+          "epochs": 20,
+          "patience": 6,
+          "batch": 64,
+          "label_smooth": 0.05,
+          "focal_gamma": 2.0,
+          "max_shift": 250,
+          "scale_sigma": 0.15,
+          "noise": 0.1,
+          "mod_drop": 0.3,
+          "feat_noise": 0.1,
+          "tta_shifts": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ],
+          "ema_horizon_epochs": 3.0,
+          "feat_dim": 32
+        },
+        "member_info": [
+          {
+            "val_auc_raw": 0.9639423076923076,
+            "val_auc_ema": 0.9633894230769231,
+            "epoch_raw": 12,
+            "epoch_ema": 17,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9613461538461539,
+            "val_auc_ema": 0.9618990384615385,
+            "epoch_raw": 15,
+            "epoch_ema": 15,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9704326923076924,
+            "val_auc_ema": 0.9702403846153846,
+            "epoch_raw": 18,
+            "epoch_ema": 19,
+            "epochs_run": 20
+          }
+        ],
+        "val_auc": 0.9681971153846155,
+        "main_view": "ens3_ema_tta"
+      },
+      {
+        "sensitivity": 0.95,
+        "specificity": 0.9055374592833876,
+        "f1": 0.8669201520912547,
+        "auc": 0.9680781758957655,
+        "n": 427,
+        "n_pos": 120,
+        "tp": 114,
+        "fp": 29,
+        "tn": 278,
+        "fn": 6,
+        "challenge_score": 86.9179600886918,
+        "ops": {
+          "t50": {
+            "threshold": 0.5,
+            "tp": 114,
+            "fp": 29,
+            "tn": 278,
+            "fn": 6
+          },
+          "s95": {
+            "threshold": 0.36618101596832275,
+            "tp": 116,
+            "fp": 49,
+            "tn": 258,
+            "fn": 4
+          },
+          "s99": {
+            "threshold": 0.13626275956630707,
+            "tp": 119,
+            "fp": 124,
+            "tn": 183,
+            "fn": 1
+          },
+          "s100": {
+            "threshold": 0.13106566667556763,
+            "tp": 119,
+            "fp": 130,
+            "tn": 177,
+            "fn": 1
+          }
+        },
+        "params": 258857,
+        "seed": 1,
+        "fold": 0,
+        "train_seconds": 37.09574913978577,
+        "n_train": 3662,
+        "n_test": 427,
+        "recipe": {
+          "arch": "mousavi_attn_cnn_rnn",
+          "aug": 1,
+          "loss": "focal",
+          "lr": 0.001,
+          "k": 3,
+          "mixup": 0.0,
+          "wd": 0.01,
+          "epochs": 20,
+          "patience": 6,
+          "batch": 64,
+          "label_smooth": 0.05,
+          "focal_gamma": 2.0,
+          "max_shift": 250,
+          "scale_sigma": 0.15,
+          "noise": 0.1,
+          "mod_drop": 0.3,
+          "feat_noise": 0.1,
+          "tta_shifts": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ],
+          "ema_horizon_epochs": 3.0,
+          "feat_dim": 32
+        },
+        "member_info": [
+          {
+            "val_auc_raw": 0.9627884615384615,
+            "val_auc_ema": 0.9624519230769231,
+            "epoch_raw": 18,
+            "epoch_ema": 18,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9649278846153846,
+            "val_auc_ema": 0.9642548076923078,
+            "epoch_raw": 14,
+            "epoch_ema": 15,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9658413461538461,
+            "val_auc_ema": 0.9651442307692307,
+            "epoch_raw": 19,
+            "epoch_ema": 19,
+            "epochs_run": 20
+          }
+        ],
+        "val_auc": 0.9657692307692307,
+        "main_view": "ens3_ema_tta"
+      },
+      {
+        "sensitivity": 0.9166666666666666,
+        "specificity": 0.9087947882736156,
+        "f1": 0.8527131782945736,
+        "auc": 0.9643593919652551,
+        "n": 427,
+        "n_pos": 120,
+        "tp": 110,
+        "fp": 28,
+        "tn": 279,
+        "fn": 10,
+        "challenge_score": 83.29764453961457,
+        "ops": {
+          "t50": {
+            "threshold": 0.5,
+            "tp": 110,
+            "fp": 28,
+            "tn": 279,
+            "fn": 10
+          },
+          "s95": {
+            "threshold": 0.3320019245147705,
+            "tp": 116,
+            "fp": 51,
+            "tn": 256,
+            "fn": 4
+          },
+          "s99": {
+            "threshold": 0.14636187255382538,
+            "tp": 118,
+            "fp": 119,
+            "tn": 188,
+            "fn": 2
+          },
+          "s100": {
+            "threshold": 0.08759727329015732,
+            "tp": 120,
+            "fp": 168,
+            "tn": 139,
+            "fn": 0
+          }
+        },
+        "params": 258857,
+        "seed": 2,
+        "fold": 0,
+        "train_seconds": 37.25741648674011,
+        "n_train": 3662,
+        "n_test": 427,
+        "recipe": {
+          "arch": "mousavi_attn_cnn_rnn",
+          "aug": 1,
+          "loss": "focal",
+          "lr": 0.001,
+          "k": 3,
+          "mixup": 0.0,
+          "wd": 0.01,
+          "epochs": 20,
+          "patience": 6,
+          "batch": 64,
+          "label_smooth": 0.05,
+          "focal_gamma": 2.0,
+          "max_shift": 250,
+          "scale_sigma": 0.15,
+          "noise": 0.1,
+          "mod_drop": 0.3,
+          "feat_noise": 0.1,
+          "tta_shifts": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ],
+          "ema_horizon_epochs": 3.0,
+          "feat_dim": 32
+        },
+        "member_info": [
+          {
+            "val_auc_raw": 0.9693509615384616,
+            "val_auc_ema": 0.9688942307692308,
+            "epoch_raw": 18,
+            "epoch_ema": 19,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9643990384615385,
+            "val_auc_ema": 0.9636298076923075,
+            "epoch_raw": 14,
+            "epoch_ema": 14,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9652884615384615,
+            "val_auc_ema": 0.9648076923076923,
+            "epoch_raw": 17,
+            "epoch_ema": 18,
+            "epochs_run": 20
+          }
+        ],
+        "val_auc": 0.9683173076923077,
+        "main_view": "ens3_ema_tta"
+      },
+      {
+        "sensitivity": 0.9333333333333333,
+        "specificity": 0.8925081433224755,
+        "f1": 0.8452830188679246,
+        "auc": 0.9646851248642779,
+        "n": 427,
+        "n_pos": 120,
+        "tp": 112,
+        "fp": 33,
+        "tn": 274,
+        "fn": 8,
+        "challenge_score": 84.0958605664488,
+        "ops": {
+          "t50": {
+            "threshold": 0.5,
+            "tp": 112,
+            "fp": 33,
+            "tn": 274,
+            "fn": 8
+          },
+          "s95": {
+            "threshold": 0.3553968369960785,
+            "tp": 116,
+            "fp": 50,
+            "tn": 257,
+            "fn": 4
+          },
+          "s99": {
+            "threshold": 0.11610239744186401,
+            "tp": 119,
+            "fp": 137,
+            "tn": 170,
+            "fn": 1
+          },
+          "s100": {
+            "threshold": 0.06445733457803726,
+            "tp": 120,
+            "fp": 193,
+            "tn": 114,
+            "fn": 0
+          }
+        },
+        "params": 258857,
+        "seed": 3,
+        "fold": 0,
+        "train_seconds": 37.95526599884033,
+        "n_train": 3662,
+        "n_test": 427,
+        "recipe": {
+          "arch": "mousavi_attn_cnn_rnn",
+          "aug": 1,
+          "loss": "focal",
+          "lr": 0.001,
+          "k": 3,
+          "mixup": 0.0,
+          "wd": 0.01,
+          "epochs": 20,
+          "patience": 6,
+          "batch": 64,
+          "label_smooth": 0.05,
+          "focal_gamma": 2.0,
+          "max_shift": 250,
+          "scale_sigma": 0.15,
+          "noise": 0.1,
+          "mod_drop": 0.3,
+          "feat_noise": 0.1,
+          "tta_shifts": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ],
+          "ema_horizon_epochs": 3.0,
+          "feat_dim": 32
+        },
+        "member_info": [
+          {
+            "val_auc_raw": 0.9621153846153846,
+            "val_auc_ema": 0.962139423076923,
+            "epoch_raw": 18,
+            "epoch_ema": 18,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9644711538461539,
+            "val_auc_ema": 0.9642307692307692,
+            "epoch_raw": 16,
+            "epoch_ema": 14,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9642067307692307,
+            "val_auc_ema": 0.9642307692307692,
+            "epoch_raw": 17,
+            "epoch_ema": 18,
+            "epochs_run": 20
+          }
+        ],
+        "val_auc": 0.9650961538461538,
+        "main_view": "ens3_ema_tta"
+      },
+      {
+        "sensitivity": 0.9416666666666667,
+        "specificity": 0.9087947882736156,
+        "f1": 0.8659003831417624,
+        "auc": 0.9672366992399567,
+        "n": 427,
+        "n_pos": 120,
+        "tp": 113,
+        "fp": 28,
+        "tn": 279,
+        "fn": 7,
+        "challenge_score": 86.15384615384616,
+        "ops": {
+          "t50": {
+            "threshold": 0.5,
+            "tp": 113,
+            "fp": 28,
+            "tn": 279,
+            "fn": 7
+          },
+          "s95": {
+            "threshold": 0.3453690707683563,
+            "tp": 116,
+            "fp": 49,
+            "tn": 258,
+            "fn": 4
+          },
+          "s99": {
+            "threshold": 0.17747242748737335,
+            "tp": 118,
+            "fp": 86,
+            "tn": 221,
+            "fn": 2
+          },
+          "s100": {
+            "threshold": 0.1447364240884781,
+            "tp": 118,
+            "fp": 107,
+            "tn": 200,
+            "fn": 2
+          }
+        },
+        "params": 258857,
+        "seed": 4,
+        "fold": 0,
+        "train_seconds": 31.90965723991394,
+        "n_train": 3662,
+        "n_test": 427,
+        "recipe": {
+          "arch": "mousavi_attn_cnn_rnn",
+          "aug": 1,
+          "loss": "focal",
+          "lr": 0.001,
+          "k": 3,
+          "mixup": 0.0,
+          "wd": 0.01,
+          "epochs": 20,
+          "patience": 6,
+          "batch": 64,
+          "label_smooth": 0.05,
+          "focal_gamma": 2.0,
+          "max_shift": 250,
+          "scale_sigma": 0.15,
+          "noise": 0.1,
+          "mod_drop": 0.3,
+          "feat_noise": 0.1,
+          "tta_shifts": [
+            -100,
+            -50,
+            0,
+            50,
+            100
+          ],
+          "ema_horizon_epochs": 3.0,
+          "feat_dim": 32
+        },
+        "member_info": [
+          {
+            "val_auc_raw": 0.9679086538461539,
+            "val_auc_ema": 0.967764423076923,
+            "epoch_raw": 16,
+            "epoch_ema": 19,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9660576923076922,
+            "val_auc_ema": 0.9655528846153846,
+            "epoch_raw": 15,
+            "epoch_ema": 15,
+            "epochs_run": 20
+          },
+          {
+            "val_auc_raw": 0.9643990384615384,
+            "val_auc_ema": 0.9649038461538462,
+            "epoch_raw": 16,
+            "epoch_ema": 16,
+            "epochs_run": 20
+          }
+        ],
+        "val_auc": 0.9692788461538462,
+        "main_view": "ens3_ema_tta"
+      }
+    ]
+  }
+}

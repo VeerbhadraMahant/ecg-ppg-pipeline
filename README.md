@@ -32,32 +32,59 @@ ECG and PPG using **cross-attention** (defined below); the other three are basel
 only one signal or a naive combination. The results (see below) show the proposed fusion model
 does perform best.
 
-## Results
+## Results (leak-free; supersedes the first version of this README)
 
-Trained on the PhysioNet/CinC Challenge 2015 training set (592 of 750 public records kept after
-filtering to a usable PPG channel and sufficient window length), record-wise 5-fold CV x 3 seeds,
-on an RTX 4060 laptop GPU.
+The first version of this project reported F1 0.774 for cross-attention fusion. That number was
+optimistically biased: the best epoch was selected on the same fold that was then reported. After
+adding an inner validation split, 10 seeds and corrected statistics, **the proposed cross-attention
+model is not better than naive concatenation, and both are clearly beaten by simpler models.**
+Full protocol: [docs/evaluation_protocol.md](docs/evaluation_protocol.md). Full tables with
+confidence intervals: [docs/LEADERBOARD.md](docs/LEADERBOARD.md) and [docs/deep_recipe.md](docs/deep_recipe.md).
 
-| Variant | Params | F1 | Sensitivity | Specificity | AUC |
-|---|---|---|---|---|---|
-| PPG only | 266,001 | 0.660 &plusmn; 0.039 | 0.856 &plusmn; 0.076 | 0.555 &plusmn; 0.106 | 0.747 &plusmn; 0.051 |
-| ECG only | 266,001 | 0.736 &plusmn; 0.030 | 0.805 &plusmn; 0.058 | 0.758 &plusmn; 0.126 | 0.818 &plusmn; 0.053 |
-| Concatenation fusion | 252,229 | 0.750 &plusmn; 0.030 | 0.804 &plusmn; 0.068 | 0.794 &plusmn; 0.067 | 0.853 &plusmn; 0.031 |
-| **Cross-attention fusion** | 261,505 | **0.774 &plusmn; 0.046** | 0.797 &plusmn; 0.062 | 0.831 &plusmn; 0.109 | **0.866 &plusmn; 0.041** |
+| Model (Challenge 2015, 592 records, 5-fold CV x 10 seeds) | Accuracy | F1 | AUC |
+|---|---|---|---|
+| **Ensemble incl. the hybrid deep model (5 seeds)** | **0.878** | **0.830** | **0.950** |
+| Ensemble of 10 models, no hybrid (10 seeds) | 0.876 | 0.827 | 0.948 |
+| **Hybrid deep recipe** (attention CNN-GRU + augmentation, EMA, TTA, 3-member ensemble; 10 seeds) | 0.871 | 0.828 | 0.932 |
+| XGBoost on engineered features (v2) | 0.871 | 0.818 | 0.939 |
+| Extra Trees / Random Forest / SVM / MLP / Logistic regression (features v2) | 0.852 - 0.867 | 0.791 - 0.802 | 0.927 - 0.947 |
+| ResNet1D (deep, early fusion) | 0.820 | 0.760 | 0.884 |
+| TCN (deep) | 0.810 | 0.751 | 0.887 |
+| CNN cross-attention fusion (the original proposal) | 0.765 | 0.699 | 0.841 |
+| CNN concatenation fusion | 0.757 | 0.693 | 0.836 |
 
-Monotonic in the predicted direction (PPG-only < ECG-only < concat < cross-attention) at matched
-parameter count, and the cross-attention gain over concatenation is **statistically significant**
-(paired t-test on matched seed/fold F1, p = 0.041, n = 15). External generalization check on MIMIC
-PERform AF (35 subjects, never trained on, a distribution-shifted transfer task): F1 = 0.642 &plusmn; 0.071.
+On VTaC (4,542 VT alarms, official patient-disjoint split, 5 seeds) the best model is the hybrid deep recipe
+(accuracy 0.913 / F1 0.858 / AUC 0.966), ahead of the 10-model ensemble (0.910 / 0.839 / 0.955), the best
+classical model MLP (0.900 / 0.821 / 0.949) and the best plain CNN (bidirectional cross-attention,
+0.857 / 0.775 / 0.933). Differences among the top three models are inside bootstrap noise; the gap to the
+originally proposed cross-attention network (0.746 F1) is not (+0.11, CI +0.07 ... +0.15).
+Caveat for the hybrid recipe: its configuration was chosen on inner-validation scores of Challenge 2015 folds
+(grid in [docs/deep_recipe.md](docs/deep_recipe.md)); those records are test records in other seeds/folds, so a small
+optimistic bias is possible. A shuffled-label control gave chance-level AUC and no leakage was found.
 
-Also reported per proposal.md's methodology: sensitivity/specificity/F1 broken down by all five
-alarm types (Tachycardia is high-sensitivity/low-specificity; Asystole and V-Fib/Flutter have too
-few true-alarm examples for their per-class numbers to be fully trusted), and inference speed
-alongside accuracy (all four variants run in under 10ms/window on the RTX 4060; cross-attention is
-the slowest at ~107 windows/sec, still comfortably real-time).
+Key findings (details in `docs/`):
 
-Full write-up, charts, and the actual attention-weight visualizations: [`results.ipynb`](results.ipynb)
-and the [results dashboard](site/index.html) (`site/index.html`, open directly or serve the folder).
+* **Cross-attention is not better than concatenation** (dF1 = +0.006, paired record-bootstrap 95% CI
+  -0.015 ... +0.028). Four attention-style fusion variants are statistically indistinguishable.
+* **Fusion models do not use ECG-PPG timing.** Swapping in another patient's same-label PPG or shifting the
+  PPG by up to 2 s changes AUC by < 0.015; attention does not track measured pulse transit time
+  (Spearman rho = -0.04, permutation p = 0.39). The pulse acts as a patient-agnostic evidence cue.
+* **Hand-crafted agreement features beat plain deep models**, and a hybrid deep recipe that combines a stronger
+  trainer (augmentation, EMA, TTA, ensembling) with an attention CNN-GRU and the features is the best single model
+  on both datasets; ensembles are about equal.
+* **Cross-dataset transfer is asymmetric**: Challenge 2015 -> VTaC is weak (F1 ~0.55-0.60), whereas VTaC ->
+  Challenge 2015 VT alarms works well (ResNet1D F1 0.773 / AUC 0.927), so single-dataset numbers
+  overstate real-world performance.
+* **Safety:** validation-chosen sensitivity targets are not met exactly on test folds (realised ~92-97%).
+  See the safety layer (`src/safety.py`) for a risk-controlled threshold with an explicit confidence bound.
+* Missed true alarms are dominated by ventricular tachycardia ([docs/error_taxonomy.md](docs/error_taxonomy.md)).
+* Foundation model (PaPaGei) did not beat from-scratch encoders ([docs/foundation_models.md](docs/foundation_models.md));
+  self-supervised pretraining + fine-tuning gives only +0.01 to +0.04 F1.
+* AF screening on MIMIC PERform AF: an RR-irregularity GBM beats all neural models ([docs/af_screening.md](docs/af_screening.md)).
+
+Other documents: [consolidated analysis findings](docs/analysis_findings.md), [updates status ledger](docs/updates_status.md), [datasheet](docs/datasheet.md), [classical models](docs/classical_models.md),
+[model card](docs/model_card.md), [TRIPOD+AI checklist](docs/tripod_ai_checklist.md), [updates.md](updates.md) (plan).
+Live replay demo: `site/replay.html`.
 
 ## Setup
 
@@ -69,34 +96,23 @@ pip install -r requirements.txt
 
 ## Pipeline
 
-1. **Download data**
-   ```bash
-   python scripts/download_data.py --dataset all
-   ```
-2. **Preprocess into fixed-length windows**
-   ```bash
-   python -m src.data.preprocess
-   ```
-3. **Match baseline-ladder parameter counts**
-   ```bash
-   python scripts/match_params.py
-   ```
-4. **Train all four ladder variants** (record-wise CV, multiple seeds)
-   ```bash
-   python -m src.train --variant all --seeds 3
-   ```
-5. **Evaluate / build comparison table**
-   ```bash
-   python -m src.evaluate
-   ```
-6. **Attention visualizations**
-   ```bash
-   python -m src.attention_viz
-   ```
-7. **External validation on MIMIC PERform AF**
-   ```bash
-   python -m src.external_validation
-   ```
+```bash
+python scripts/download_data.py --dataset challenge2015       # PhysioNet; slow host, see scripts/download_vtac.py for the parallel range-request trick
+python scripts/download_vtac.py --workers 12                  # VTaC v1.1 windows around the alarm (~1 GB instead of 18 GB)
+python -m src.data.preprocess                                 # PPG cohort (592) + recovered cohort (724) + cohort_audit.csv
+python scripts/build_vtac_windows.py                          # decision-time windows (+ --post-seconds 5/10/30 for time-to-verdict)
+python scripts/match_params.py                                # parameter-match all neural variants (~261k)
+python -m src.train --variant all --run-name challenge2015_ppg                       # 10 seeds, record-wise CV, inner validation
+python -m src.train --variant ecg_only,concat,resnet1d --protocol official --processed data/processed/vtac_windows.npz --run-name vtac_official
+python -m src.baselines_gbm                                   # hand-crafted features + gradient boosting
+python -m src.classical --dataset cinc --run-name classical_cinc                     # six classical algorithms on features v2
+python -m src.ensemble --run-name challenge2015_ppg --out-run final_cinc --members ...   # leak-free ensembles
+python -m src.evaluate --run-name challenge2015_ppg           # tables + corrected statistics
+python scripts/final_leaderboard.py                           # docs/LEADERBOARD.md
+python -m src.analysis.counterfactual / attention_ptt / faithfulness / modality_subsets / stress_benchmark / error_taxonomy
+python -m src.pretrain --objective contrastive; python scripts/run_label_efficiency.py
+python -m src.safety --variant cross_attention
+```
 
 ## Project layout
 

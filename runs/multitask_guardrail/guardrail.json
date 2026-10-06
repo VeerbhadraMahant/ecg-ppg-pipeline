@@ -1,0 +1,87 @@
+{
+  "baseline": "mt_noaux",
+  "challenger": "mt_aux",
+  "n_pairs": 15,
+  "f1": {
+    "mean_noaux": 0.7093364568425921,
+    "mean_aux": 0.7093820144559821,
+    "mean_diff": 4.5557613390082946e-05,
+    "t_stat": 0.0019652805927173273,
+    "p_value": 0.9984596634395756,
+    "n_pairs": 15
+  },
+  "auc": {
+    "mean_noaux": 0.8433469333334412,
+    "mean_aux": 0.844957899406526,
+    "mean_diff": 0.0016109660730847446,
+    "t_stat": 0.08974907151425911,
+    "p_value": 0.9297579608190076,
+    "n_pairs": 15
+  },
+  "sensitivity": {
+    "mean_noaux": 0.7551209609751504,
+    "mean_aux": 0.7325945180294197,
+    "mean_diff": -0.022526442945730488,
+    "t_stat": -0.4955235355347192,
+    "p_value": 0.6279179104688942,
+    "n_pairs": 15
+  },
+  "specificity": {
+    "mean_noaux": 0.7752466521696838,
+    "mean_aux": 0.8051838458774454,
+    "mean_diff": 0.029937193707761676,
+    "t_stat": 0.38280824957887905,
+    "p_value": 0.7076111908875542,
+    "n_pairs": 15
+  },
+  "challenge_score": {
+    "mean_noaux": 56.472328175324535,
+    "mean_aux": 55.95759083912831,
+    "mean_diff": -0.5147373361962371,
+    "t_stat": -0.2115224324431561,
+    "p_value": 0.835527870381414,
+    "n_pairs": 15
+  },
+  "record_bootstrap_f1_t50": {
+    "metric": "f1",
+    "obs_diff": 0.0026708760838317636,
+    "ci95_low": -0.022562553735620442,
+    "ci95_high": 0.026979057978080565,
+    "p_value": 0.8672,
+    "n_boot": 5000
+  },
+  "record_bootstrap_challenge_score_t50": {
+    "metric": "challenge_score",
+    "obs_diff": -0.7098429987615589,
+    "ci95_low": -3.950531521316892,
+    "ci95_high": 2.417073432435186,
+    "p_value": 0.644,
+    "n_boot": 5000
+  },
+  "aux_head_test_metrics_mean": {
+    "type_acc": {
+      "aux": 0.6221383468641694,
+      "noaux_untrained": 0.19412239472060014
+    },
+    "quality_mae": {
+      "aux": 0.14393706520398458,
+      "noaux_untrained": 0.32388816475868226
+    },
+    "quality_pearson_ecg": {
+      "aux": 0.7121268605086966,
+      "noaux_untrained": -0.05576683349392444
+    },
+    "quality_pearson_ppg": {
+      "aux": 0.7399832493579737,
+      "noaux_untrained": -0.014068712581886722
+    },
+    "beat_f1_ecg": {
+      "aux": 0.7016293413087697,
+      "noaux_untrained": 0.08781887639829596
+    },
+    "beat_f1_ppg": {
+      "aux": 0.7023739018644078,
+      "noaux_untrained": 0.0935824130923739
+    }
+  }
+}

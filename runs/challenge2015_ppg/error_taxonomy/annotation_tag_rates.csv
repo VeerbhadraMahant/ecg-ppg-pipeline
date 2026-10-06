@@ -1,0 +1,43 @@
+variant,category,tag,n,n_tag,pct
+gbm_features,persistent_FN,ECG artefact,29,8,27.586206896551722
+gbm_features,persistent_FN,low ECG quality,29,2,6.896551724137931
+gbm_features,persistent_FN,low pulse quality,29,6,20.689655172413794
+gbm_features,persistent_FN,PPG artefact,29,13,44.827586206896555
+gbm_features,persistent_FN,beat detectors disagree,29,13,44.827586206896555
+gbm_features,persistent_FN,pulse absent,29,1,3.4482758620689653
+gbm_features,persistent_FN,no heuristic flag,29,9,31.03448275862069
+gbm_features,persistent_FP,ECG artefact,20,6,30.0
+gbm_features,persistent_FP,low ECG quality,20,0,0.0
+gbm_features,persistent_FP,low pulse quality,20,7,35.0
+gbm_features,persistent_FP,PPG artefact,20,12,60.0
+gbm_features,persistent_FP,beat detectors disagree,20,9,45.0
+gbm_features,persistent_FP,pulse absent,20,1,5.0
+gbm_features,persistent_FP,no heuristic flag,20,1,5.0
+gbm_features,stable_correct,ECG artefact,473,129,27.27272727272727
+gbm_features,stable_correct,low ECG quality,473,45,9.513742071881607
+gbm_features,stable_correct,low pulse quality,473,64,13.530655391120508
+gbm_features,stable_correct,PPG artefact,473,173,36.57505285412262
+gbm_features,stable_correct,beat detectors disagree,473,190,40.169133192389005
+gbm_features,stable_correct,pulse absent,473,21,4.439746300211417
+gbm_features,stable_correct,no heuristic flag,473,117,24.735729386892178
+cross_attention,persistent_FN,ECG artefact,32,9,28.125
+cross_attention,persistent_FN,low ECG quality,32,0,0.0
+cross_attention,persistent_FN,low pulse quality,32,10,31.25
+cross_attention,persistent_FN,PPG artefact,32,14,43.75
+cross_attention,persistent_FN,beat detectors disagree,32,11,34.375
+cross_attention,persistent_FN,pulse absent,32,2,6.25
+cross_attention,persistent_FN,no heuristic flag,32,10,31.25
+cross_attention,persistent_FP,ECG artefact,38,8,21.052631578947366
+cross_attention,persistent_FP,low ECG quality,38,2,5.263157894736842
+cross_attention,persistent_FP,low pulse quality,38,8,21.052631578947366
+cross_attention,persistent_FP,PPG artefact,38,20,52.63157894736842
+cross_attention,persistent_FP,beat detectors disagree,38,13,34.21052631578947
+cross_attention,persistent_FP,pulse absent,38,0,0.0
+cross_attention,persistent_FP,no heuristic flag,38,10,26.31578947368421
+cross_attention,stable_correct,ECG artefact,393,120,30.53435114503817
+cross_attention,stable_correct,low ECG quality,393,38,9.669211195928753
+cross_attention,stable_correct,low pulse quality,393,53,13.486005089058525
+cross_attention,stable_correct,PPG artefact,393,140,35.6234096692112
+cross_attention,stable_correct,beat detectors disagree,393,171,43.51145038167939
+cross_attention,stable_correct,pulse absent,393,14,3.5623409669211195
+cross_attention,stable_correct,no heuristic flag,393,92,23.40966921119593

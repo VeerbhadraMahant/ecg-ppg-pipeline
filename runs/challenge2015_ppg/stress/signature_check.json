@@ -1,0 +1,21 @@
+{
+  "snr_db": 12,
+  "n_windows": 445,
+  "labels_unchanged": true,
+  "injection_functions_take_no_labels": true,
+  "spectral_only_auc": 0.6221537684635778,
+  "ecg_only/prob_only_auc": 0.549561923999495,
+  "ecg_only/prob+spectral_auc": 0.6388082312839289,
+  "ecg_only/mean_prob_clean": 0.5163158774375916,
+  "ecg_only/mean_prob_injected": 0.5010654926300049,
+  "ppg_only/prob_only_auc": 0.5295190001262468,
+  "ppg_only/prob+spectral_auc": 0.6212144931195556,
+  "ppg_only/mean_prob_clean": 0.48749107122421265,
+  "ppg_only/mean_prob_injected": 0.4994599223136902,
+  "cross_attention/prob_only_auc": 0.5222370912763541,
+  "cross_attention/prob+spectral_auc": 0.6329503850523923,
+  "cross_attention/mean_prob_clean": 0.45835331082344055,
+  "cross_attention/mean_prob_injected": 0.4438401758670807,
+  "noise_component_vs_label_auc": 0.5305312038885515,
+  "provenance": "NSTDB noise = recordings of electrode-motion/baseline-wander/muscle noise made by physically recording noise on volunteers with ECG leads, then added to clean MIT-BIH Arrhythmia DB records 118/119 (physionet.org/content/nstdb). It is a different database with different subjects, acquisition hardware and sampling rate (360 Hz) from the PhysioNet/CinC 2015 ICU alarm records, so no CinC record contributes noise segments. PPG artefact is synthetic Gaussian noise (0.5-5 Hz) with no source recording at all."
+}

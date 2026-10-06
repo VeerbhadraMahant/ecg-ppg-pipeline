@@ -1,0 +1,207 @@
+{
+  "synthetic": {
+    "dataset": "synthetic",
+    "results": {
+      "noise0.0": {
+        "tp": 248,
+        "fp": 0,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 1.0,
+        "f1": 1.0,
+        "ptt_bias_s": 0.11930306915306914
+      },
+      "noise0.1": {
+        "tp": 239,
+        "fp": 364,
+        "fn": 9,
+        "sensitivity": 0.9637096774193549,
+        "ppv": 0.3963515754560531,
+        "f1": 0.5616921269095182,
+        "ptt_bias_s": 0.04158516414198273
+      },
+      "noise0.3": {
+        "tp": 210,
+        "fp": 387,
+        "fn": 38,
+        "sensitivity": 0.8467741935483871,
+        "ppv": 0.35175879396984927,
+        "f1": 0.4970414201183432,
+        "ptt_bias_s": 0.039007496296806644
+      }
+    }
+  },
+  "mitdb": {
+    "dataset": "mitdb",
+    "tolerance_ms": 150.0,
+    "minutes_per_record": 5.0,
+    "per_record": {
+      "100": {
+        "tp": 371,
+        "fp": 1,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 0.9973118279569892,
+        "f1": 0.9986541049798116
+      },
+      "101": {
+        "tp": 339,
+        "fp": 3,
+        "fn": 3,
+        "sensitivity": 0.9912280701754386,
+        "ppv": 0.9912280701754386,
+        "f1": 0.9912280701754386
+      },
+      "103": {
+        "tp": 355,
+        "fp": 0,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 1.0,
+        "f1": 1.0
+      },
+      "105": {
+        "tp": 417,
+        "fp": 0,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 1.0,
+        "f1": 1.0
+      },
+      "106": {
+        "tp": 301,
+        "fp": 1,
+        "fn": 30,
+        "sensitivity": 0.9093655589123867,
+        "ppv": 0.9966887417218543,
+        "f1": 0.9510268562401264
+      },
+      "119": {
+        "tp": 326,
+        "fp": 1,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 0.9969418960244648,
+        "f1": 0.998468606431853
+      },
+      "200": {
+        "tp": 431,
+        "fp": 0,
+        "fn": 2,
+        "sensitivity": 0.9953810623556582,
+        "ppv": 1.0,
+        "f1": 0.9976851851851852
+      },
+      "203": {
+        "tp": 405,
+        "fp": 1,
+        "fn": 94,
+        "sensitivity": 0.811623246492986,
+        "ppv": 0.9975369458128078,
+        "f1": 0.8950276243093923
+      },
+      "207": {
+        "tp": 239,
+        "fp": 94,
+        "fn": 29,
+        "sensitivity": 0.8917910447761194,
+        "ppv": 0.7177177177177178,
+        "f1": 0.7953410981697171
+      },
+      "217": {
+        "tp": 363,
+        "fp": 2,
+        "fn": 0,
+        "sensitivity": 1.0,
+        "ppv": 0.9945205479452055,
+        "f1": 0.9972527472527473
+      }
+    },
+    "pooled": {
+      "tp": 3547,
+      "fp": 103,
+      "fn": 158,
+      "sensitivity": 0.9573549257759784,
+      "ppv": 0.9717808219178082,
+      "f1": 0.9645139360978926
+    }
+  },
+  "bidmc": {
+    "dataset": "bidmc",
+    "note": "BIDMC has no beat annotations; validated against monitor HR/PULSE numerics (1 Hz), not beat-level truth.",
+    "per_record": [
+      {
+        "record": "bidmc01",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.3863320566256239,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 1.06533587648195,
+        "ppg_hr_within5pct": 0.9666666666666667
+      },
+      {
+        "record": "bidmc02",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.7425759059298912,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 1.5613487634312297,
+        "ppg_hr_within5pct": 1.0
+      },
+      {
+        "record": "bidmc03",
+        "n_windows": 24,
+        "ecg_hr_mae_bpm": 2.716188661860716,
+        "ecg_hr_within5pct": 0.875,
+        "ppg_hr_mae_bpm": 0.5717746332845569,
+        "ppg_hr_within5pct": 1.0
+      },
+      {
+        "record": "bidmc04",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.5397263180552537,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 0.6572951483425451,
+        "ppg_hr_within5pct": 1.0
+      },
+      {
+        "record": "bidmc05",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.6826058433866161,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 2.7417404402116774,
+        "ppg_hr_within5pct": 0.9666666666666667
+      },
+      {
+        "record": "bidmc06",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.40218166685606227,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 0.6538178542704524,
+        "ppg_hr_within5pct": 1.0
+      },
+      {
+        "record": "bidmc07",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.261319308321688,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 0.4322436325766266,
+        "ppg_hr_within5pct": 1.0
+      },
+      {
+        "record": "bidmc08",
+        "n_windows": 30,
+        "ecg_hr_mae_bpm": 0.3871955863112291,
+        "ecg_hr_within5pct": 1.0,
+        "ppg_hr_mae_bpm": 0.4150128410033313,
+        "ppg_hr_within5pct": 1.0
+      }
+    ],
+    "mean_ecg_hr_mae_bpm": 0.764765668418385,
+    "mean_ppg_hr_mae_bpm": 1.012321148700296,
+    "mean_pulse_coverage": 0.8929291909071322,
+    "ptt_median_s": 0.46,
+    "ptt_iqr_s": [
+      0.444,
+      0.488
+    ]
+  }
+}
