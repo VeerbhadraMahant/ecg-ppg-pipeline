@@ -8,9 +8,13 @@ import torch
 import torch.nn as nn
 
 from .encoders import CNNEncoder
-from .fusion import ConcatFusion, CrossAttentionFusion
+from .baselines import ZOO, build_zoo_model
+from .fusion import FUSION_REGISTRY, ConcatFusion
 
-VARIANTS = ["ecg_only", "ppg_only", "concat", "cross_attention"]
+VARIANTS = ["ecg_only", "ppg_only", "concat", "cross_attention"]  # the original baseline ladder
+FUSION_VARIANTS = ["bi_cross_attention", "joint_transformer", "bottleneck", "gated_cross_attention"]
+MULTIMODAL = "multimodal"  # needs the (N,4,T) stacked input, see models/multimodal.py
+ALL_VARIANTS = VARIANTS + FUSION_VARIANTS + ZOO
 
 
 class ClassificationHead(nn.Module):
@@ -52,8 +56,8 @@ class AlarmClassifier(nn.Module):
         width_mult: float = 1.0,
     ):
         super().__init__()
-        if variant not in VARIANTS:
-            raise ValueError(f"unknown variant {variant!r}, expected one of {VARIANTS}")
+        if variant not in VARIANTS + FUSION_VARIANTS:
+            raise ValueError(f"unknown variant {variant!r}, expected one of {VARIANTS + FUSION_VARIANTS}")
         self.variant = variant
 
         def make_encoder():
@@ -70,10 +74,10 @@ class AlarmClassifier(nn.Module):
             self.ppg_encoder = make_encoder()
             self.fusion = ConcatFusion(self.ecg_encoder.out_dim, self.ppg_encoder.out_dim, attn_dim)
             head_in = self.fusion.out_dim
-        else:  # cross_attention
+        else:  # cross_attention and the other attention-style fusion rivals
             self.ecg_encoder = make_encoder()
             self.ppg_encoder = make_encoder()
-            self.fusion = CrossAttentionFusion(
+            self.fusion = FUSION_REGISTRY[variant](
                 self.ecg_encoder.out_dim, self.ppg_encoder.out_dim, attn_dim, attn_heads, dropout
             )
             head_in = self.fusion.out_dim
@@ -91,7 +95,7 @@ class AlarmClassifier(nn.Module):
             ecg_seq = self.ecg_encoder(ecg)
             ppg_seq = self.ppg_encoder(ppg)
             feat = self.fusion(ecg_seq, ppg_seq)
-        else:  # cross_attention
+        else:  # cross_attention and fusion rivals
             ecg_seq = self.ecg_encoder(ecg)
             ppg_seq = self.ppg_encoder(ppg)
             fused_seq, attn_weights = self.fusion(ecg_seq, ppg_seq)
@@ -105,8 +109,17 @@ def count_params(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def build_model(variant: str, cfg: dict, width_mult: float = 1.0) -> AlarmClassifier:
+def build_model(variant: str, cfg: dict, width_mult: float = 1.0) -> nn.Module:
+    if variant in ZOO:
+        return build_zoo_model(variant, cfg, width_mult)
     m = cfg["model"]
+    if variant == MULTIMODAL:
+        from .multimodal import MultiModalAlarmClassifier
+
+        return MultiModalAlarmClassifier(
+            m["cnn_channels"], m["cnn_kernel_sizes"], m["cnn_pool"], m["dropout"], m["attn_dim"],
+            m["attn_heads"], m["head_hidden"], width_mult, m.get("modality_dropout", 0.3),
+        )
     return AlarmClassifier(
         variant=variant,
         cnn_channels=m["cnn_channels"],

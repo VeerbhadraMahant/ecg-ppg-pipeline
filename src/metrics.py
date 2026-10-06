@@ -39,6 +39,56 @@ def binary_metrics(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.
     }
 
 
+def challenge_score(tp: float, tn: float, fp: float, fn: float) -> float:
+    """Official PhysioNet/CinC 2015 score: (TP+TN) / (TP+TN+FP+5*FN) * 100.
+    A missed true alarm costs five times a false alarm."""
+    tp, tn, fp, fn = (np.asarray(v, dtype=float) for v in (tp, tn, fp, fn))
+    denom = tp + tn + fp + 5 * fn
+    score = np.where(denom > 0, 100.0 * (tp + tn) / np.where(denom > 0, denom, 1.0), np.nan)
+    return float(score) if score.ndim == 0 else score
+
+
+def threshold_for_sensitivity(y_val: np.ndarray, p_val: np.ndarray, target: float) -> float:
+    """Largest threshold whose sensitivity on the (inner validation) set is
+    >= target. Chosen on validation data only, then applied unchanged to the
+    held-out test fold, so the reported operating point is not tuned on test."""
+    pos = np.sort(p_val[y_val.astype(int) == 1])
+    if len(pos) == 0:
+        return 0.5
+    # need at least ceil(target * n_pos) positives at or above the threshold
+    k = int(np.ceil(target * len(pos)))
+    k = min(max(k, 1), len(pos))
+    return float(pos[len(pos) - k])
+
+
+SENS_TARGETS = (0.95, 0.99, 1.0)
+
+
+def operating_points(y_val, p_val, y_test, p_test) -> dict:
+    """Confusion counts on the test fold at threshold 0.5 and at the
+    thresholds that reach each target sensitivity on the validation set."""
+    out = {}
+    thr = {"t50": 0.5}
+    for s in SENS_TARGETS:
+        thr[f"s{int(round(s * 100))}"] = threshold_for_sensitivity(y_val, p_val, s)
+    y_test = y_test.astype(int)
+    for name, t in thr.items():
+        pred = (p_test >= t).astype(int)
+        out[name] = {
+            "threshold": t,
+            "tp": int(((pred == 1) & (y_test == 1)).sum()),
+            "fp": int(((pred == 1) & (y_test == 0)).sum()),
+            "tn": int(((pred == 0) & (y_test == 0)).sum()),
+            "fn": int(((pred == 0) & (y_test == 1)).sum()),
+        }
+    return out
+
+
+def suppression_rate(tn: float, fp: float) -> float:
+    """Fraction of false alarms suppressed (== specificity at that operating point)."""
+    return tn / (tn + fp) if (tn + fp) > 0 else float("nan")
+
+
 def summarize_across_folds(fold_metrics: list[dict]) -> dict:
     """Mean +/- std for each metric across folds/seeds, as called for in
     proposal.md (error bars, not a single run)."""

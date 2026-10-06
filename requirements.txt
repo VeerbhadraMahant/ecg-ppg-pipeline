@@ -11,3 +11,10 @@ tqdm
 jupyter
 nbformat
 ipykernel
+joblib
+xgboost
+lightgbm
+PyWavelets
+reportlab
+nbclient
+nbconvert

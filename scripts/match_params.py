@@ -16,7 +16,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.models.classifier import build_model, count_params  # noqa: E402
+from src.models.classifier import ALL_VARIANTS, build_model, count_params  # noqa: E402
 
 
 def params_for(variant: str, cfg: dict, width_mult: float) -> int:
@@ -25,7 +25,7 @@ def params_for(variant: str, cfg: dict, width_mult: float) -> int:
 
 
 def find_width_mult(variant: str, cfg: dict, target: int, tol: float = 0.03) -> float:
-    lo, hi = 0.5, 4.0
+    lo, hi = 0.25, 8.0
     for _ in range(40):
         mid = (lo + hi) / 2
         n = params_for(variant, cfg, mid)
@@ -41,13 +41,13 @@ def find_width_mult(variant: str, cfg: dict, target: int, tol: float = 0.03) -> 
 def main() -> None:
     cfg = yaml.safe_load((ROOT / "configs" / "config.yaml").read_text())
 
-    # cross_attention (width_mult=1.0) is the reference; the other three are
-    # widened/narrowed to match its parameter count.
+    # cross_attention (width_mult=1.0) is the reference; every other variant
+    # (ladder, fusion rivals, baseline zoo) is widened/narrowed to match it.
     reference_params = params_for("cross_attention", cfg, 1.0)
     print(f"reference (cross_attention, width_mult=1.0): {reference_params:,} params")
 
     result = {"cross_attention": 1.0}
-    for variant in ["concat", "ecg_only", "ppg_only"]:
+    for variant in [v for v in ALL_VARIANTS + ["multimodal"] if v != "cross_attention"]:
         wm = find_width_mult(variant, cfg, reference_params)
         n = params_for(variant, cfg, wm)
         result[variant] = round(wm, 4)

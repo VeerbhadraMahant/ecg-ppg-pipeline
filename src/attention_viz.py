@@ -54,6 +54,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(ROOT / "configs" / "config.yaml"))
     parser.add_argument("--n-examples", type=int, default=6)
+    parser.add_argument("--run-name", default="challenge2015_ppg")
     parser.add_argument("--out-dir", default=None)
     args = parser.parse_args()
 
@@ -65,7 +66,7 @@ def main() -> None:
     ecg, ppg, label, record_id = data["ecg"], data["ppg"], data["label"], data["record_id"]
 
     width_mult = get_width_mult("cross_attention", ROOT)
-    ckpt_dir = ROOT / cfg["paths"]["runs_dir"] / "checkpoints"
+    ckpt_dir = ROOT / cfg["paths"]["runs_dir"] / args.run_name / "checkpoints"
     ckpts = sorted(ckpt_dir.glob("cross_attention_seed0_fold*.pt"))
     if not ckpts:
         raise FileNotFoundError(f"no cross_attention checkpoints in {ckpt_dir}; run src/train.py first")
@@ -76,7 +77,7 @@ def main() -> None:
     model.load_state_dict(torch.load(ckpt_dir / f"cross_attention_seed0_fold{fold_i}.pt", map_location=device))
     model.eval()
 
-    out_dir = Path(args.out_dir) if args.out_dir else ROOT / cfg["paths"]["runs_dir"] / "attention_plots"
+    out_dir = Path(args.out_dir) if args.out_dir else ROOT / cfg["paths"]["runs_dir"] / args.run_name / "attention_plots"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rng = np.random.RandomState(0)

@@ -24,6 +24,7 @@ quality:
 split:
   n_folds: 5
   record_wise: true
+  val_fraction: 0.15   # share of each training fold's records held out for early stopping
 
 model:
   cnn_channels: [32, 64, 128]
@@ -42,3 +43,29 @@ train:
   early_stop_patience: 10
   loss: focal            # focal | weighted_bce
   focal_gamma: 2.0
+  n_seeds: 10            # updates.md Phase 0: 10 seeds (was 3)
+  save_ckpt_seeds: 1     # checkpoints kept only for seed 0; predictions are kept for every seed
+
+# Comparison family fixed BEFORE running (updates.md Phase 0.1). Each is
+# [baseline, challenger]; the corrected resampled t-test and the record-level
+# bootstrap are both run on exactly these, with Holm correction across them.
+stats:
+  primary_metric: f1
+  n_boot: 5000
+  comparisons:
+    - [concat, cross_attention]
+    - [ecg_only, cross_attention]
+    - [ppg_only, cross_attention]
+    - [ecg_only, concat]
+    - [cross_attention, bi_cross_attention]
+    - [cross_attention, joint_transformer]
+    - [cross_attention, bottleneck]
+    - [cross_attention, gated_cross_attention]
+    - [ecg_only, resnet1d]
+    - [resnet1d, cross_attention]
+    - [inceptiontime, cross_attention]
+    - [bigru, cross_attention]
+    - [tcn, cross_attention]
+    - [transformer, cross_attention]
+    - [ssm, cross_attention]
+    - [gbm_features, cross_attention]

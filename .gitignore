@@ -26,3 +26,16 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated report PDF (rebuild with: python scripts/build_report_pdf.py)
+docs/REPORT.pdf
+
+# Bulky run artifacts: per-fold predictions, arrays, logs (regenerate with the pipeline)
+runs/**/preds/
+runs/**/*.npz
+runs/**/*.log
+runs/*.log
+runs/**/oof_*.npz
+runs/pretrain/
+runs/**/*.npy
+runs/**/_features/

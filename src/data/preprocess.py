@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 from src.data.challenge2015_loader import (  # noqa: E402
     ALARM_TRIGGER_SECONDS,
     load_record,
+    load_record_multi,
     read_alarms,
     read_records,
 )
@@ -48,30 +49,50 @@ def extract_window(sig: np.ndarray, fs: float, trigger_s: float, window_s: float
     return sig[start:end]
 
 
-def process_record(ecg, ecg_fs, ppg, ppg_fs, cfg) -> tuple[np.ndarray, np.ndarray, float] | None:
+def prep_channel(sig, fs, band, cfg):
+    """Resample, window (ending at the alarm trigger), filter, z-normalize and
+    score one channel. Returns (normalized window float32, quality) or None."""
     s = cfg["signal"]
-    target_fs = s["target_fs"]
-
-    ecg_rs = resample_signal(ecg, ecg_fs, target_fs)
-    ppg_rs = resample_signal(ppg, ppg_fs, target_fs)
-
-    ecg_win = extract_window(ecg_rs, target_fs, ALARM_TRIGGER_SECONDS, s["window_seconds"])
-    ppg_win = extract_window(ppg_rs, target_fs, ALARM_TRIGGER_SECONDS, s["window_seconds"])
-    if ecg_win is None or ppg_win is None:
-        return None
-
-    ecg_filt = bandpass_filter(ecg_win, target_fs, *s["ecg_band"], order=s["filter_order"])
-    ppg_filt = bandpass_filter(ppg_win, target_fs, *s["ppg_band"], order=s["filter_order"])
-
-    ecg_norm = z_normalize(ecg_filt)
-    ppg_norm = z_normalize(ppg_filt)
-
     q = cfg["quality"]
-    ecg_q = signal_quality_score(ecg_win, q["flatline_std_threshold"], q["clip_fraction_threshold"])
-    ppg_q = signal_quality_score(ppg_win, q["flatline_std_threshold"], q["clip_fraction_threshold"])
-    quality = min(ecg_q, ppg_q)
+    rs = resample_signal(sig, fs, s["target_fs"])
+    win = extract_window(rs, s["target_fs"], ALARM_TRIGGER_SECONDS, s["window_seconds"])
+    if win is None:
+        return None
+    filt = bandpass_filter(win, s["target_fs"], *band, order=s["filter_order"])
+    quality = signal_quality_score(win, q["flatline_std_threshold"], q["clip_fraction_threshold"])
+    return z_normalize(filt).astype(np.float32), float(quality)
 
-    return ecg_norm.astype(np.float32), ppg_norm.astype(np.float32), quality
+
+def process_record(ecg, ecg_fs, ppg, ppg_fs, cfg) -> tuple[np.ndarray, np.ndarray, float] | None:
+    """Back-compatible ECG+PPG pair processor (min quality over both)."""
+    s = cfg["signal"]
+    e = prep_channel(ecg, ecg_fs, s["ecg_band"], cfg)
+    p = prep_channel(ppg, ppg_fs, s["ppg_band"], cfg)
+    if e is None or p is None:
+        return None
+    return e[0], p[0], min(e[1], p[1])
+
+
+def _write_cohort(path: Path, rows: list[dict], T: int) -> None:
+    def stack(key):
+        return np.stack([r[key] for r in rows]) if rows else np.zeros((0, T), np.float32)
+
+    np.savez(
+        path,
+        ecg=stack("ecg"),
+        ppg=stack("pulse"),  # PPG, or ABP where PPG is absent (see pulse_is_abp)
+        ecg2=stack("ecg2"),
+        abp=stack("abp"),
+        label=np.array([r["label"] for r in rows], dtype=np.float32),
+        quality=np.array([r["quality"] for r in rows], dtype=np.float32),
+        ecg_quality=np.array([r["ecg_q"] for r in rows], dtype=np.float32),
+        pulse_quality=np.array([r["pulse_q"] for r in rows], dtype=np.float32),
+        record_id=np.array([r["record_id"] for r in rows]),
+        alarm_type=np.array([r["alarm_type"] for r in rows]),
+        pulse_is_abp=np.array([r["pulse_is_abp"] for r in rows], dtype=bool),
+        has_ecg2=np.array([r["has_ecg2"] for r in rows], dtype=bool),
+        has_abp=np.array([r["has_abp"] for r in rows], dtype=bool),
+    )
 
 
 def main() -> None:
@@ -82,63 +103,98 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
+    s = cfg["signal"]
     training_dir = ROOT / cfg["paths"]["raw_dir"] / "training"
     out_dir = ROOT / cfg["paths"]["processed_dir"]
     out_dir.mkdir(parents=True, exist_ok=True)
+    T = int(s["window_seconds"] * s["target_fs"])
+    zeros = np.zeros(T, np.float32)
 
     alarms = read_alarms(training_dir)
     records = read_records(training_dir)
 
-    ecgs, ppgs, labels, qualities, record_ids, alarm_types = [], [], [], [], [], []
-    skipped_no_ppg = 0
-    skipped_window = 0
-    skipped_quality = 0
+    ppg_rows, recovered_rows, audit = [], [], []
 
     for record_id in tqdm(records, desc="preprocessing"):
         if record_id not in alarms:
             continue
         alarm_type, label = alarms[record_id]
+        entry = {"record_id": record_id, "alarm_type": alarm_type, "label": label,
+                 "signals": "", "has_ppg": False, "has_abp": False, "has_ecg2": False,
+                 "in_ppg_cohort": False, "in_recovered_cohort": False, "reason": ""}
 
-        loaded = load_record(training_dir, record_id)
+        loaded = load_record_multi(training_dir, record_id)
         if loaded is None:
-            skipped_no_ppg += 1
+            entry["reason"] = "no_ecg"
+            audit.append(entry)
             continue
-        ecg, ecg_fs, ppg, ppg_fs = loaded
+        fs = loaded["fs"]
+        entry["signals"] = "|".join(loaded["sig_names"])
+        entry["has_ppg"] = loaded["ppg"] is not None
+        entry["has_abp"] = loaded["abp"] is not None
+        entry["has_ecg2"] = loaded["ecg2"] is not None
 
-        result = process_record(ecg, ecg_fs, ppg, ppg_fs, cfg)
-        if result is None:
-            skipped_window += 1
+        ecg = prep_channel(loaded["ecg"], fs, s["ecg_band"], cfg)
+        ecg2 = prep_channel(loaded["ecg2"], fs, s["ecg_band"], cfg) if entry["has_ecg2"] else None
+        ppg = prep_channel(loaded["ppg"], fs, s["ppg_band"], cfg) if entry["has_ppg"] else None
+        abp = prep_channel(loaded["abp"], fs, s["ppg_band"], cfg) if entry["has_abp"] else None
+
+        if ecg is None:
+            entry["reason"] = "window_too_short"
+            audit.append(entry)
             continue
-        ecg_norm, ppg_norm, quality = result
 
-        if quality < args.min_quality:
-            skipped_quality += 1
-            continue
+        def make_row(pulse, pulse_is_abp):
+            quality = min(ecg[1], pulse[1])
+            return {
+                "record_id": record_id, "alarm_type": alarm_type, "label": float(label),
+                "ecg": ecg[0], "pulse": pulse[0],
+                "ecg2": ecg2[0] if ecg2 else zeros, "abp": abp[0] if abp else zeros,
+                "ecg_q": ecg[1], "pulse_q": pulse[1], "quality": quality,
+                "pulse_is_abp": pulse_is_abp, "has_ecg2": ecg2 is not None, "has_abp": abp is not None,
+            }
 
-        ecgs.append(ecg_norm)
-        ppgs.append(ppg_norm)
-        labels.append(float(label))
-        qualities.append(quality)
-        record_ids.append(record_id)
-        alarm_types.append(alarm_type)
+        if ppg is not None and ppg[1] >= args.min_quality and min(ecg[1], ppg[1]) >= args.min_quality:
+            row = make_row(ppg, False)
+            ppg_rows.append(row)
+            recovered_rows.append(row)
+            entry["in_ppg_cohort"] = entry["in_recovered_cohort"] = True
+        elif abp is not None and min(ecg[1], abp[1]) >= args.min_quality:
+            recovered_rows.append(make_row(abp, True))
+            entry["in_recovered_cohort"] = True
+            entry["reason"] = "recovered_via_abp" if not entry["has_ppg"] else "recovered_via_abp_ppg_bad"
+        else:
+            entry["reason"] = ("no_ppg_no_abp" if not (entry["has_ppg"] or entry["has_abp"])
+                               else "window_or_quality")
+        audit.append(entry)
 
-    print(f"\nkept {len(ecgs)} / {len(records)} records "
-          f"(skipped: no_ppg={skipped_no_ppg}, window={skipped_window}, quality={skipped_quality})")
+    import pandas as pd
 
-    out_path = out_dir / "challenge2015_windows.npz"
-    np.savez(
-        out_path,
-        ecg=np.stack(ecgs),
-        ppg=np.stack(ppgs),
-        label=np.array(labels, dtype=np.float32),
-        quality=np.array(qualities, dtype=np.float32),
-        record_id=np.array(record_ids),
-        alarm_type=np.array(alarm_types),
-    )
-    print(f"wrote {out_path}")
+    audit_df = pd.DataFrame(audit)
+    audit_df.to_csv(out_dir / "cohort_audit.csv", index=False)
 
-    labels_arr = np.array(labels)
-    print(f"label balance: {labels_arr.mean():.1%} true alarms ({int(labels_arr.sum())}/{len(labels_arr)})")
+    n = len(audit_df)
+    flow = {
+        "records_in_training_set": n,
+        "with_ppg": int(audit_df.has_ppg.sum()),
+        "with_abp": int(audit_df.has_abp.sum()),
+        "with_second_ecg_lead": int(audit_df.has_ecg2.sum()),
+        "ppg_cohort": int(audit_df.in_ppg_cohort.sum()),
+        "recovered_cohort_ppg_or_abp": int(audit_df.in_recovered_cohort.sum()),
+        "recovered_via_abp": int((audit_df.reason.str.startswith("recovered_via_abp")).sum()),
+        "excluded_reasons": audit_df[~audit_df.in_recovered_cohort].reason.value_counts().to_dict(),
+    }
+    import json
+
+    (out_dir / "cohort_flow.json").write_text(json.dumps(flow, indent=2))
+    print("cohort flow:", json.dumps(flow, indent=2))
+
+    _write_cohort(out_dir / "challenge2015_windows.npz", ppg_rows, T)
+    _write_cohort(out_dir / "challenge2015_windows_recovered.npz", recovered_rows, T)
+    for name, rows in [("challenge2015_windows.npz (PPG cohort)", ppg_rows),
+                       ("challenge2015_windows_recovered.npz (PPG or ABP)", recovered_rows)]:
+        lab = np.array([r["label"] for r in rows])
+        print(f"wrote {name}: {len(rows)} records, {lab.mean():.1%} true alarms ({int(lab.sum())}/{len(lab)})")
 
 
 if __name__ == "__main__":

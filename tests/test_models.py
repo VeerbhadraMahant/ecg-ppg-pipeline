@@ -44,3 +44,24 @@ def test_param_counts_are_positive_and_differ_by_variant():
     counts = {v: count_params(build_model(v, CFG)) for v in VARIANTS}
     assert all(c > 0 for c in counts.values())
     assert counts["concat"] != counts["ecg_only"]
+
+
+def test_fusion_rivals_and_zoo_forward_and_backward():
+    from src.models.classifier import FUSION_VARIANTS
+    from src.models.baselines import ZOO
+
+    ecg = torch.randn(3, 2500)
+    ppg = torch.randn(3, 2500)
+    for variant in FUSION_VARIANTS + ZOO:
+        model = build_model(variant, CFG)
+        logits, _ = model(ecg, ppg)
+        assert logits.shape == (3,), variant
+        logits.sum().backward()
+        assert any(p.grad is not None and p.grad.abs().sum() > 0 for p in model.parameters()), variant
+
+
+def test_gated_fusion_exposes_gates_in_unit_interval():
+    model = build_model("gated_cross_attention", CFG)
+    model(torch.randn(2, 2500), torch.randn(2, 2500))
+    ge, gp = model.fusion.last_gates
+    assert (0 <= ge).all() and (ge <= 1).all() and (0 <= gp).all() and (gp <= 1).all()

@@ -3,6 +3,11 @@ only, never trained on). Loads the best cross_attention checkpoint from the
 Challenge-2015 training run and evaluates it on MIMIC subjects windowed the
 same way as training data.
 
+NOTE (updates.md 3.6): this zero-shot transfer is NOT a valid generalisation
+benchmark, because the task differs (AF vs non-AF). The proper evaluation is
+the fine-tuned subject-wise AF task in src/af_task.py; this script is kept
+only as a diagnostic of whether the alarm-verification features carry over.
+
 Caveat: the Challenge-2015 model is trained to verify alarm true/false-ness
 (does the ECG abnormality have PPG corroboration), while MIMIC PERform AF's
 label is AF/non-AF. These are related but distinct tasks, so this is a
@@ -34,7 +39,7 @@ from src.models.classifier import build_model  # noqa: E402
 from src.train import get_width_mult  # noqa: E402
 
 
-def build_external_windows(cfg: dict) -> dict:
+def build_external_windows(cfg: dict, max_windows_per_subject: int | None = None) -> dict:
     s = cfg["signal"]
     mimic_dir = ROOT / cfg["paths"]["external_dir"]
 
@@ -47,7 +52,10 @@ def build_external_windows(cfg: dict) -> dict:
 
         win_len = int(s["window_seconds"] * s["target_fs"])
         n_windows = len(ecg_rs) // win_len
-        for w in range(n_windows):
+        picks = range(n_windows)
+        if max_windows_per_subject and n_windows > max_windows_per_subject:
+            picks = np.unique(np.linspace(0, n_windows - 1, max_windows_per_subject).astype(int))
+        for w in picks:
             e = ecg_rs[w * win_len:(w + 1) * win_len]
             p = ppg_rs[w * win_len:(w + 1) * win_len]
 
@@ -71,6 +79,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(ROOT / "configs" / "config.yaml"))
     parser.add_argument("--variant", default="cross_attention")
+    parser.add_argument("--run-name", default="challenge2015_ppg")
     args = parser.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text())
@@ -82,7 +91,7 @@ def main() -> None:
           f"({data['label'].mean():.1%} AF)")
 
     width_mult = get_width_mult(args.variant, ROOT)
-    ckpt_dir = ROOT / cfg["paths"]["runs_dir"] / "checkpoints"
+    ckpt_dir = ROOT / cfg["paths"]["runs_dir"] / args.run_name / "checkpoints"
     ckpts = sorted(ckpt_dir.glob(f"{args.variant}_seed0_fold*.pt"))
     if not ckpts:
         raise FileNotFoundError(f"no checkpoints for {args.variant} in {ckpt_dir}; run src/train.py first")

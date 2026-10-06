@@ -23,3 +23,16 @@ def test_record_wise_folds_cover_all_windows_exactly_once():
         assert not seen[val_idx].any()
         seen[val_idx] = True
     assert seen.all()
+
+
+def test_record_wise_holdout_is_disjoint_by_record_and_excludes_test_fold():
+    import numpy as np
+    from src.data.dataset import record_wise_holdout
+
+    record_id = np.array([f"r{i // 3}" for i in range(60)])  # 20 records x 3 windows
+    for train_idx, test_idx in record_wise_folds(record_id, n_folds=5, seed=0):
+        fit_idx, val_idx = record_wise_holdout(record_id, train_idx, 0.25, seed=0)
+        assert set(fit_idx) | set(val_idx) == set(train_idx)
+        assert not set(fit_idx) & set(val_idx)
+        assert not set(record_id[fit_idx]) & set(record_id[val_idx])
+        assert not set(val_idx) & set(test_idx)

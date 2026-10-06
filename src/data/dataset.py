@@ -36,6 +36,19 @@ def load_processed(path: str | Path) -> dict:
     return {k: data[k] for k in data.files}
 
 
+def record_wise_holdout(record_id: np.ndarray, idx: np.ndarray, val_fraction: float, seed: int):
+    """Split `idx` into (fit_idx, holdout_idx) by record, so a model-selection
+    set (early stopping / best-epoch choice) can be carved out of a training
+    fold without ever touching the outer test fold."""
+    recs = np.unique(record_id[idx])
+    rng = np.random.RandomState(seed)
+    rng.shuffle(recs)
+    n_val = max(1, int(round(len(recs) * val_fraction)))
+    val_recs = set(recs[:n_val])
+    in_val = np.array([r in val_recs for r in record_id[idx]])
+    return idx[~in_val], idx[in_val]
+
+
 def record_wise_folds(record_id: np.ndarray, n_folds: int, seed: int):
     """Yield (train_idx, val_idx) with all windows from a given record in
     exactly one side of the split — never split a patient's record across
