@@ -16,6 +16,8 @@ OUT.mkdir(exist_ok=True)
 # ---- 1. re-use the paper's data figures, saved as PNG for Word -------------------
 sys.path.insert(0, str(ROOT / "paper"))
 import make_figures as mf
+mf.COL.update({"classical": "#808080", "deep": "#C8C8C8", "ensemble": "#404040", "proposed": "#000000", "hybrid": "#606060"})
+plt.rcParams.update({"font.family": "Liberation Serif", "mathtext.fontset": "stix"})
 mf.OUT = OUT
 _orig = plt.Figure.savefig
 def _png(self, fname, *a, **k):
@@ -25,7 +27,7 @@ plt.Figure.savefig = _png
 for f in (mf.fig_leak, mf.fig_leaderboard, mf.fig_forest, mf.fig_counterfactual, mf.fig_noise, mf.fig_transfer):
     f()
 plt.Figure.savefig = _orig
-plt.rcParams.update({"font.family": "serif", "font.size": 9, "savefig.bbox": "tight", "figure.dpi": 150})
+plt.rcParams.update({"font.family": "Liberation Serif", "mathtext.fontset": "stix", "font.size": 9, "savefig.bbox": "tight", "figure.dpi": 150})
 
 # ---- 2. confusion matrices from results.json fold counts --------------------------
 def counts(path, key):
@@ -44,11 +46,11 @@ fig, axes = plt.subplots(2, 2, figsize=(6.4, 5.6))
 report = {}
 for ax, (title, (t, seeds)) in zip(axes.ravel(), CM.items()):
     m = np.array([[t["tn"], t["fp"]], [t["fn"], t["tp"]]]) / seeds
-    ax.imshow(m, cmap="Blues", vmin=0, vmax=m.max() * 1.15)
+    ax.imshow(m, cmap="Greys", vmin=0, vmax=m.max() * 1.15)
     for i in range(2):
         for j in range(2):
             ax.text(j, i, f"{m[i, j]:.1f}", ha="center", va="center", fontsize=11,
-                    color="white" if m[i, j] > m.max() * 0.55 else "black")
+                    color="white" if m[i, j] > m.max() * 0.6 else "black")
     ax.set_xticks([0, 1], ["False alarm", "True alarm"])
     ax.set_yticks([0, 1], ["False alarm", "True alarm"], rotation=90, va="center")
     ax.set_xlabel("Predicted"); ax.set_ylabel("Actual")
@@ -65,7 +67,7 @@ for ax, (p, label, cap) in zip(axes, [("runs/deep_plus_cinc/results.json", "Chal
                                       ("runs/deep_plus_vtac/results.json", "VTaC", 20)]):
     fm = json.load(open(ROOT / p))["deepplus"]["fold_metrics"]
     ep = [m["epoch_ema"] for f in fm for m in f["member_info"]]
-    ax.hist(ep, bins=np.arange(0.5, cap + 1.5, 1), color="#4C78A8")
+    ax.hist(ep, bins=np.arange(0.5, cap + 1.5, 1), color="#808080")
     ax.axvline(cap, color="r", ls="--", lw=0.8)
     ax.set_xlabel("Best epoch (EMA, inner-val. AUC)")
     ax.set_ylabel("Ensemble members")
@@ -75,7 +77,7 @@ fig.savefig(OUT / "best_epoch.png", dpi=220)
 plt.close(fig)
 
 # ---- 4. workflow diagram ------------------------------------------------------------
-def boxflow(steps, fname, w=7.4, h=2.3, cols=4, color="#DCE9F5"):
+def boxflow(steps, fname, w=7.4, h=2.3, cols=4, color="white"):
     rows = -(-len(steps) // cols)
     fig, ax = plt.subplots(figsize=(w, h * rows / 1.0 * 0.75))
     ax.set_xlim(0, cols); ax.set_ylim(0, rows); ax.axis("off")
@@ -84,17 +86,17 @@ def boxflow(steps, fname, w=7.4, h=2.3, cols=4, color="#DCE9F5"):
         r, c = divmod(i, cols)
         if r % 2 == 1: c = cols - 1 - c
         x, y = c + 0.08, rows - 1 - r + 0.18
-        ax.add_patch(mp.FancyBboxPatch((x, y), 0.84, 0.64, boxstyle="round,pad=0.02", fc=color, ec="#2F4B6E", lw=1))
-        ax.text(x + 0.42, y + 0.32, s, ha="center", va="center", fontsize=6.3)
+        ax.add_patch(mp.FancyBboxPatch((x, y), 0.84, 0.64, boxstyle="square,pad=0.02", fc=color, ec="black", lw=1))
+        ax.text(x + 0.42, y + 0.32, s, ha="center", va="center", fontsize=7.2)
         pos.append((x, y, r, c))
     for (x1, y1, r1, c1), (x2, y2, r2, c2) in zip(pos[:-1], pos[1:]):
         if r1 == r2:
             d = 1 if c2 > c1 else -1
             ax.annotate("", xy=(x2 + (0.0 if d > 0 else 0.84), y2 + 0.32), xytext=(x1 + (0.84 if d > 0 else 0.0), y1 + 0.32),
-                        arrowprops=dict(arrowstyle="-|>", color="#2F4B6E"))
+                        arrowprops=dict(arrowstyle="-|>", color="black"))
         else:
             ax.annotate("", xy=(x2 + 0.42, y2 + 0.64), xytext=(x1 + 0.42, y1),
-                        arrowprops=dict(arrowstyle="-|>", color="#2F4B6E"))
+                        arrowprops=dict(arrowstyle="-|>", color="black"))
     fig.savefig(OUT / fname, dpi=220)
     plt.close(fig)
 
@@ -108,14 +110,14 @@ boxflow(["Problem definition:\nverify an ECG-triggered\nICU alarm",
          "Results, statistics,\ncounterfactual and\nrobustness analysis"], "workflow.png")
 
 # ---- 5. architecture diagrams ---------------------------------------------------------
-def arch(blocks, fname, w=9.2):
+def arch(blocks, fname, w=7.2):
     fig, ax = plt.subplots(figsize=(w, 3.9))
     ax.set_xlim(0, 12); ax.set_ylim(0, 5); ax.axis("off")
-    def box(x, y, wd, ht, txt, fc="#DCE9F5"):
-        ax.add_patch(mp.FancyBboxPatch((x, y), wd, ht, boxstyle="round,pad=0.03", fc=fc, ec="#2F4B6E", lw=1))
-        ax.text(x + wd / 2, y + ht / 2, txt, ha="center", va="center", fontsize=6.0)
+    def box(x, y, wd, ht, txt, fc="white"):
+        ax.add_patch(mp.FancyBboxPatch((x, y), wd, ht, boxstyle="square,pad=0.03", fc=fc, ec="black", lw=1))
+        ax.text(x + wd / 2, y + ht / 2, txt, ha="center", va="center", fontsize=7.4)
     def arrow(x1, y1, x2, y2):
-        ax.annotate("", xy=(x2, y2), xytext=(x1, y1), arrowprops=dict(arrowstyle="-|>", color="#2F4B6E"))
+        ax.annotate("", xy=(x2, y2), xytext=(x1, y1), arrowprops=dict(arrowstyle="-|>", color="black"))
     for b in blocks:
         if b[0] == "box": box(*b[1:])
         else: arrow(*b[1:])
@@ -123,25 +125,25 @@ def arch(blocks, fname, w=9.2):
     plt.close(fig)
 
 arch([
- ("box", 0.05, 3.3, 1.3, 1.1, "ECG\nwindow\n(2500)", "#FFF2CC"),
- ("box", 0.05, 0.6, 1.3, 1.1, "PPG / ABP\nwindow\n(2500)", "#FFF2CC"),
+ ("box", 0.05, 3.3, 1.3, 1.1, "ECG\nwindow\n(2500)", "white"),
+ ("box", 0.05, 0.6, 1.3, 1.1, "PPG / ABP\nwindow\n(2500)", "white"),
  ("box", 1.7, 2.9, 2.9, 1.9, "CNN encoder (ECG)\n3 x [Conv1d, BN, ReLU,\nMaxPool 2, Dropout 0.3]\nk = 15, 9, 7\nch = 32, 64, 128\n-> (312 x 128)"),
  ("box", 1.7, 0.2, 2.9, 1.9, "CNN encoder (PPG)\nsame layers,\nown weights\n-> (312 x 128)"),
- ("box", 5.1, 0.9, 2.9, 3.2, "Cross-attention fusion\nLinear 128->128\n+ positional encoding\nECG = queries\nPPG = keys, values\n4 heads\nresidual + LayerNorm\n-> (312 x 128)", "#E2F0D9"),
+ ("box", 5.1, 0.9, 2.9, 3.2, "Cross-attention fusion\nLinear 128->128\n+ positional encoding\nECG = queries\nPPG = keys, values\n4 heads\nresidual + LayerNorm\n-> (312 x 128)", "white"),
  ("box", 8.4, 1.8, 1.4, 1.4, "Mean pool\nover time\n-> (128)"),
- ("box", 10.1, 1.1, 1.85, 2.8, "Head\nLinear 128->64\nReLU, Dropout\nLinear 64->1\nsigmoid\n-> P(true alarm)", "#FCE4D6"),
+ ("box", 10.1, 1.1, 1.85, 2.8, "Head\nLinear 128->64\nReLU, Dropout\nLinear 64->1\nsigmoid\n-> P(true alarm)", "white"),
  ("arrow", 1.35, 3.85, 1.7, 3.85), ("arrow", 1.35, 1.15, 1.7, 1.15),
  ("arrow", 4.6, 3.85, 5.1, 3.4), ("arrow", 4.6, 1.15, 5.1, 1.7),
  ("arrow", 8.0, 2.5, 8.4, 2.5), ("arrow", 9.8, 2.5, 10.1, 2.5),
 ], "arch_ladder.png")
 
 arch([
- ("box", 0.05, 3.3, 1.3, 1.1, "ECG\nwindow\n(2500)", "#FFF2CC"),
- ("box", 0.05, 0.6, 1.3, 1.1, "PPG / ABP\nwindow\n(2500)", "#FFF2CC"),
- ("box", 1.7, 2.7, 3.9, 2.2, "ECG branch\n3 x [Conv1d, BN, ReLU, MaxPool 4]\nch = 21, 41, 82; k = 15, 7, 5 -> (39 x 82)\nBiGRU, 82 units per direction -> (39 x 164)\nadditive attention pooling -> (164)"),
+ ("box", 0.05, 3.3, 1.3, 1.1, "ECG\nwindow\n(2500)", "white"),
+ ("box", 0.05, 0.6, 1.3, 1.1, "PPG / ABP\nwindow\n(2500)", "white"),
+ ("box", 1.7, 2.7, 3.9, 2.2, "ECG branch\n3 x [Conv1d, BN, ReLU, MaxPool 4]\nch = 21, 41, 82; k = 15, 7, 5\n-> (39 x 82)\nBiGRU, 82 units per direction\n-> (39 x 164)\nadditive attention pooling -> (164)"),
  ("box", 1.7, 0.1, 3.9, 2.2, "PPG branch\nsame structure, own weights\n-> (164)"),
- ("box", 6.0, 1.5, 1.5, 2.0, "Concatenate\n-> (328)", "#E2F0D9"),
- ("box", 7.9, 1.2, 2.0, 2.6, "Head\nLinear 328->64\nReLU, Dropout 0.3\nLinear 64->1", "#FCE4D6"),
+ ("box", 6.0, 1.5, 1.5, 2.0, "Concatenate\n-> (328)", "white"),
+ ("box", 7.9, 1.2, 2.0, 2.6, "Head\nLinear 328->64\nReLU, Dropout 0.3\nLinear 64->1", "white"),
  ("box", 10.2, 1.2, 1.75, 2.6, "Training/test\nrecipe\nx3 members\nEMA weights\nTTA (5 shifts)\nmean probability"),
  ("arrow", 1.35, 3.85, 1.7, 3.85), ("arrow", 1.35, 1.15, 1.7, 1.15),
  ("arrow", 5.6, 3.8, 6.0, 3.1), ("arrow", 5.6, 1.2, 6.0, 1.9),

@@ -31,24 +31,24 @@ function runs(text, opt = {}) {
   const parts = text.split(/(\*[^*]+\*)/g).filter(s => s !== '');
   for (const p of parts) {
     if (p.startsWith('*') && p.endsWith('*') && p.length > 2)
-      out.push(new TextRun({ text: p.slice(1, -1), italics: true, font: FONT, size: opt.size || 24, bold: opt.bold }));
-    else out.push(new TextRun({ text: p, font: FONT, size: opt.size || 24, bold: opt.bold, italics: opt.italics }));
+      out.push(new TextRun({ text: p.slice(1, -1), italics: true, font: FONT, size: opt.size || 28, bold: opt.bold }));
+    else out.push(new TextRun({ text: p, font: FONT, size: opt.size || 28, bold: opt.bold, italics: opt.italics }));
   }
   return out;
 }
 const body = (text, opt = {}) => new Paragraph({
   children: runs(text, opt), alignment: opt.align || AlignmentType.JUSTIFIED,
-  spacing: { after: opt.after ?? 140, line: 300 }, indent: opt.indent,
+  spacing: { after: opt.after ?? 120, line: 276 }, indent: opt.indent,
   keepNext: opt.keepNext,
 });
-const h1 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: t, font: FONT, size: 28, bold: true })], spacing: { before: 320, after: 160 }, keepNext: true });
-const h2 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: t, font: FONT, size: 24, bold: true })], spacing: { before: 220, after: 100 }, keepNext: true });
-const h3 = (t) => new Paragraph({ children: [new TextRun({ text: t, font: FONT, size: 24, bold: true, italics: true })], spacing: { before: 140, after: 80 }, keepNext: true });
+const h1 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: t, font: FONT, size: 32, bold: true })], spacing: { before: 320, after: 160 }, keepNext: true });
+const h2 = (t) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: t, font: FONT, size: 28, bold: true })], spacing: { before: 220, after: 100 }, keepNext: true });
+const h3 = (t) => new Paragraph({ children: [new TextRun({ text: t, font: FONT, size: 28, bold: true, italics: true })], spacing: { before: 140, after: 80 }, keepNext: true });
 const center = (t, opt = {}) => new Paragraph({ children: runs(t, opt), alignment: AlignmentType.CENTER, spacing: { after: opt.after ?? 120 } });
 const bullets = (items) => items.map(t => new Paragraph({
-  numbering: { reference: 'bul', level: 0 }, children: runs(t), alignment: AlignmentType.JUSTIFIED, spacing: { after: 70, line: 290 } }));
+  numbering: { reference: 'bul', level: 0 }, children: runs(t), alignment: AlignmentType.JUSTIFIED, spacing: { after: 70, line: 276 } }));
 const numbered = (items, ref = 'num') => items.map(t => new Paragraph({
-  numbering: { reference: ref, level: 0 }, children: runs(t), alignment: AlignmentType.JUSTIFIED, spacing: { after: 70, line: 290 } }));
+  numbering: { reference: ref, level: 0 }, children: runs(t), alignment: AlignmentType.JUSTIFIED, spacing: { after: 70, line: 276 } }));
 
 // ---------- figures and tables ----------
 let figN = 0, tabN = 0;
@@ -60,34 +60,34 @@ function fig(file, widthIn, caption) {
   figN += 1;
   const f = path.join(FIG, file);
   const { w, h } = pngSize(f);
-  const wpx = Math.round(widthIn * 96), hpx = Math.round(wpx * h / w);
+  const wpx = Math.round(Math.min(widthIn, 6.2) * 96), hpx = Math.round(wpx * h / w);
   return [
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 120, after: 60 }, keepNext: true,
       children: [new ImageRun({ type: 'png', data: fs.readFileSync(f), transformation: { width: wpx, height: hpx },
         altText: { title: `Figure ${figN}`, description: caption, name: file } })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
-      children: [new TextRun({ text: `Figure ${figN}: `, bold: true, font: FONT, size: 21 }), ...runs(caption, { size: 21 })] }),
+      children: [new TextRun({ text: `Figure ${figN}: `, bold: true, font: FONT, size: 24 }), ...runs(caption, { size: 24 })] }),
   ];
 }
 function eq(file, widthIn, number) {
   const f = path.join(FIG, file);
   const { w, h } = pngSize(f);
-  const wpx = Math.round(widthIn * 96), hpx = Math.round(wpx * h / w);
+  const wpx = Math.round(Math.min(widthIn, 6.2) * 96), hpx = Math.round(wpx * h / w);
   return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 120 },
     children: [new ImageRun({ type: 'png', data: fs.readFileSync(f), transformation: { width: wpx, height: hpx },
       altText: { title: `Equation ${number}`, description: `Equation ${number}`, name: file } }),
-      new TextRun({ text: number === '' ? '' : `    (${number})`, font: FONT, size: 22 })] });
+      new TextRun({ text: number === '' ? '' : `    (${number})`, font: FONT, size: 24 })] });
 }
-const border = { style: BorderStyle.SINGLE, size: 4, color: '808080' };
+const border = { style: BorderStyle.SINGLE, size: 4, color: '000000' };
 const borders = { top: border, bottom: border, left: border, right: border };
 function cell(text, w, o = {}) {
   return new TableCell({
     borders, width: { size: w, type: WidthType.DXA },
-    shading: o.head ? { fill: 'D9E2F3', type: ShadingType.CLEAR, color: 'auto' } : (o.fill ? { fill: o.fill, type: ShadingType.CLEAR, color: 'auto' } : undefined),
+    shading: undefined,
     margins: { top: 50, bottom: 50, left: 80, right: 80 },
     children: String(text).split('\n').map(line => new Paragraph({
       alignment: o.align || AlignmentType.LEFT, spacing: { after: 0 },
-      children: runs(line, { size: o.size || 19, bold: o.head || o.bold }) })),
+      children: runs(line, { size: o.size || 20, bold: o.head || o.bold }) })),
   });
 }
 function table(caption, widths, header, rows, o = {}) {
@@ -103,7 +103,7 @@ function table(caption, widths, header, rows, o = {}) {
   });
   return [
     new Paragraph({ spacing: { before: 160, after: 80 }, keepNext: true, alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: `Table ${tabN}: `, bold: true, font: FONT, size: 21 }), ...runs(caption, { size: 21 })] }),
+      children: [new TextRun({ text: `Table ${tabN}: `, bold: true, font: FONT, size: 24 }), ...runs(caption, { size: 24 })] }),
     new Table({ width: { size: TW, type: WidthType.DXA }, columnWidths: widths, rows: trs }),
     new Paragraph({ spacing: { after: 160 }, children: [] }),
   ];
@@ -119,20 +119,20 @@ const P = (...a) => S.push(...a.flat());
 
 // ---------- title page ----------
 P(new Paragraph({ spacing: { before: 900 }, children: [] }));
-P(center('Mini-Project Report', { size: 28, bold: true, after: 200 }));
-P(center('TY B.Tech Artificial Intelligence and Machine Learning', { size: 24, after: 500 }));
-P(center('Verifying ICU Arrhythmia Alarms from ECG and Pulse Signals: Cross-Attention Fusion Compared with Feature-Based and Deep Learning Baselines', { size: 34, bold: true, after: 600 }));
-P(center('Submitted by', { size: 24, after: 120 }));
-['Veerbhadra Mahant', 'Ved Jadhav', 'Sharvil Patil'].forEach(n => P(center(n, { size: 26, bold: true, after: 40 })));
+P(center('Mini-Project Report', { size: 32, bold: true, after: 200 }));
+P(center('TY B.Tech Artificial Intelligence and Machine Learning', { size: 28, after: 500 }));
+P(center('Verifying ICU Arrhythmia Alarms from ECG and Pulse Signals: Cross-Attention Fusion Compared with Feature-Based and Deep Learning Baselines', { size: 40, bold: true, after: 600 }));
+P(center('Submitted by', { size: 28, after: 120 }));
+['Veerbhadra Mahant', 'Ved Jadhav', 'Sharvil Patil'].forEach(n => P(center(n, { size: 30, bold: true, after: 40 })));
 P(center('', { after: 200 }));
-P(center('Under the guidance of', { size: 24, after: 100 }));
-P(center('Dr. Roshani Raut', { size: 26, bold: true, after: 40 }));
-P(center('Department of Information Technology', { size: 24, after: 400 }));
-P(center('Pimpri Chinchwad College of Engineering, Pune', { size: 26, bold: true, after: 60 }));
-P(center('Pune, India', { size: 24, after: 300 }));
-P(center('veerbhadra.mahant24@pccoepune.org  |  ved.jadhav24@pccoepune.org', { size: 21, after: 40 }));
-P(center('sharvil.patil24@pccoepune.org  |  roshani.raut@pccoepune.org', { size: 21, after: 300 }));
-P(center('October 2026', { size: 24 }));
+P(center('Under the guidance of', { size: 28, after: 100 }));
+P(center('Dr. Roshani Raut', { size: 30, bold: true, after: 40 }));
+P(center('Department of Information Technology', { size: 28, after: 400 }));
+P(center('Pimpri Chinchwad College of Engineering, Pune', { size: 30, bold: true, after: 60 }));
+P(center('Pune, India', { size: 28, after: 300 }));
+P(center('veerbhadra.mahant24@pccoepune.org  |  ved.jadhav24@pccoepune.org', { size: 24, after: 40 }));
+P(center('sharvil.patil24@pccoepune.org  |  roshani.raut@pccoepune.org', { size: 24, after: 300 }));
+P(center('October 2026', { size: 28 }));
 P(new Paragraph({ children: [new PageBreak()] }));
 
 // ---------- abstract ----------
@@ -177,7 +177,7 @@ P(...table('Comparison of the key studies reviewed. Results are quoted from the 
     [`Lehman et al., 2023 ${c('vtac')}`, 'VTaC: over 5,000 VT alarms, at least 2 annotators', 'Benchmark of conventional, deep, semi-supervised and generative methods', 'Dataset and benchmark paper; results in the paper', 'VT alarms only; no detailed clinical information'],
     [`Pillai et al., 2025 ${c('papagei')}`, '20 tasks, 10 datasets; pretrained on about 57,000 h of PPG', 'Open PPG foundation model (PaPaGei)', '+6.3% classification, +2.9% regression in at least 14 tasks', 'Listed tasks do not include ICU alarm verification, so transfer had to be tested'],
     [`Charlton et al., 2022 ${c('charlton')}`, '8 datasets, 15 PPG beat detectors', 'Benchmark framework for beat detection', 'Eight detectors F1 of 90% or more at rest; poorer in AF, neonates, exercise', 'Source of the MIMIC PERform AF data used in the AF side task'],
-  ], { size: 17 }));
+  ], { size: 20 }));
 P(body(`Taken together, the reviewed work leaves a practical question open. Whether numbers from different papers can be lined up depends on splits and validation details that the abstracts do not give. A fair comparison needs the same splits, the same parameter budget, a validation set separate from the test fold, and strong non-deep baselines next to the networks. The project addresses that gap: a leakage-audited comparison on two datasets, and a direct test of whether attention between ECG and pulse is doing what its design assumes.`));
 
 // ---------- 3 Dataset ----------
@@ -190,7 +190,7 @@ P(...table('Datasets and external resources.', [1700, 1250, 1700, 1500, 2876],
     ['VTaC v1.1', '4,542 events kept of 5,037', '2 channels x 2,500 samples (raw); 266 engineered features', 'True VT alarm (28.0%), false', `${c('vtac', 'vtacdata')}; physionet.org/content/vtac/`],
     ['MIMIC PERform AF', '35 subjects; 2,100 windows used', 'ECG and PPG, 125 Hz', 'AF (19 subjects), non-AF (16)', `${c('perform', 'charlton')}; zenodo.org/records/15906524`],
     ['MIT-BIH Noise Stress Test', 'noise recordings', 'baseline wander, electrode motion, muscle artefact', 'not applicable (noise source)', `${c('nstdb')}; physionet.org/content/nstdb/1.0.0/`],
-  ], { size: 17 }));
+  ], { size: 20 }));
 P(h2('3.1 PhysioNet/CinC Challenge 2015'));
 P(body(`The training set has 750 five-minute ICU records at 250 Hz, each holding a bedside-monitor alarm that fires at the 300 s mark and an expert true or false label for one of five alarm types ${c('cinc', 'cliff16')}. Recordings were read with the WFDB tools from PhysioNet ${c('physionet')}. Of the 750 records, 627 have a PPG channel, 343 have arterial blood pressure (ABP) and all have a second ECG lead. The original PPG cohort keeps the 592 records with a usable PPG window, of which 37.7% are true alarms. A recovered cohort of 724 records (39.6% true) uses ABP as the pulse channel for 132 records without PPG and drops 26 records whose window is too short or nearly flat.`));
 P(...table('Alarm types in the 592-record PPG cohort.', [3400, 1800, 1900, 1926],
@@ -236,7 +236,7 @@ P(...table('Layer-by-layer description of the cross-attention fusion network (wi
     ['Residual connection + LayerNorm', '(312 x 128)', 'Stabilises the fused sequence'],
     ['Mean over time', '(128)', 'Summary vector for the whole window'],
     ['Linear(128 to 64), ReLU, Dropout 0.3, Linear(64 to 1), sigmoid', '(1)', 'Probability that the alarm is true'],
-  ], { size: 17 }));
+  ], { size: 20 }));
 P(body(`The ECG-only and PPG-only models use one encoder and a mean-pooled head, with channel widths scaled by 1.79 to reach the same parameter count. The concatenation model keeps both encoders but replaces attention with a linear projection of each pooled signal followed by concatenation. Details are in the configuration files of the repository. The sigmoid output is a probability, and the loss and optimiser are described in Section 6.`));
 P(h2('5.2 Attention CNN-GRU recipe (the strongest deep model)'));
 P(body(`This model replaces cross-attention with a recurrent branch per signal. A three-block CNN shrinks 2,500 samples to 39 time steps, a bidirectional GRU reads them, and additive attention pools the sequence into one context vector. The two context vectors are concatenated and classified. Three members with different initialisations are trained and their probabilities averaged.`));
@@ -251,7 +251,7 @@ P(...table('Layer-by-layer description of one member of the recipe (width multip
     ['Additive attention pooling (dimension 82)', '(164)', 'Weighted summary of the window'],
     ['Concatenate ECG and PPG branches', '(328)', 'Joint representation'],
     ['Linear(328 to 64), ReLU, Dropout 0.3, Linear(64 to 1)', '(1)', 'Logit; sigmoid gives the probability'],
-  ], { size: 17 }));
+  ], { size: 20 }));
 P(body('Each branch has 118,868 parameters and the head has 21,121, which adds up to the reported 258,857. Training uses augmentation (a joint time shift of up to one second, amplitude scaling, noise and random dropout of one modality), focal loss, AdamW with a one-cycle schedule, an exponential moving average of the weights and, at test time, averaging over five small time shifts.'));
 P(h2('5.3 Transfer learning with a PPG foundation model'));
 P(body(`A side experiment tested whether an open PPG foundation model could replace the scratch PPG encoder. The pretrained network was PaPaGei-S (a ResNet1D with a mixture-of-experts, 512-dimensional embeddings) ${c('papagei')}, with weights from Zenodo record 13983110 and the authors’ code (BSD-3-Clause-Clear licence; the weights record states no licence). Its input is 10 s at 125 Hz, so windows were decimated from 250 Hz. Three setups were run: a frozen encoder with a linear probe, a frozen encoder feeding a scratch ECG CNN and the same fusion layers, and fine-tuning of only the last residual block and final batch normalisation at a learning rate of 1e-4 while all other layers stayed frozen. Low-rank adapters were not used.`));
@@ -305,7 +305,7 @@ P(...table('Hyperparameters: values searched and final values.', [1900, 3500, 36
     ['Architecture', 'Recipe grid: 6 architectures', 'Attention CNN-GRU (mean inner-validation AUC 0.936 for the winning configuration)'],
     ['Ensemble size', 'Ablation: 1, 2 and 3 members', '3'],
     ['Classical models', '30 random configurations per fold and algorithm, chosen on inner validation', 'Chosen separately in each fold'],
-  ], { size: 18 }));
+  ], { size: 20 }));
 P(body('Every ladder variant used the same settings; none was tuned separately. The recipe grid was scored only on inner-validation AUC, and the test folds were not used to make any of these choices, with the one caveat discussed in Section 8.'));
 P(h2('7.3 Performance metrics'));
 P(body(`The positive class is "true alarm". Accuracy, precision, recall (sensitivity) and F1 follow the standard definitions, where TP, TN, FP and FN are true positives, true negatives, false positives and false negatives. Specificity is TN/(TN+FP), and AUC is the area under the ROC curve.`));
@@ -320,10 +320,10 @@ P(body(`Tables ${tabN + 1} and ${tabN + 2} compare the models on the held-out fo
 const cincRows = T.cinc.map(r => r.label);
 P(...table('Challenge 2015, PPG cohort (592 records; 5-fold cross-validation, 10 seeds, 50 test folds).', [3300, 900, 1350, 1350, 1050, 1076],
   ['Model', 'Acc.', 'F1', 'AUC', 'Sens.', 'Spec.'],
-  metricRows(T.cinc).map(r => (r[0].startsWith('Attention CNN-GRU') ? { cells: r, _bold: true } : r)), { size: 17, numFrom: 1 }));
+  metricRows(T.cinc).map(r => (r[0].startsWith('Attention CNN-GRU') ? { cells: r, _bold: true } : r)), { size: 20, numFrom: 1 }));
 P(...table('VTaC, official split (427 test events, 120 true alarms; 5 seeds, 10 for the single-signal models).', [3300, 900, 1350, 1350, 1050, 1076],
   ['Model', 'Acc.', 'F1', 'AUC', 'Sens.', 'Spec.'],
-  metricRows(T.vtac).map(r => (r[0].startsWith('Attention CNN-GRU') ? { cells: r, _bold: true } : r)), { size: 17, numFrom: 1 }));
+  metricRows(T.vtac).map(r => (r[0].startsWith('Attention CNN-GRU') ? { cells: r, _bold: true } : r)), { size: 20, numFrom: 1 }));
 P(body('Ensembles of ten models reached accuracy 0.876, F1 0.827 and AUC 0.948 on Challenge 2015 (10 seeds), and 0.910, 0.839 and 0.955 on VTaC (5 seeds). Adding the recipe to the ensemble gave accuracy 0.878, F1 0.830 and AUC 0.950 on Challenge 2015 (5 seeds). The full leaderboard with bootstrap intervals is in the repository file docs/LEADERBOARD.md.'));
 P(...fig('leaderboard.png', 6.4, 'F1 of the compared models on Challenge 2015 (left) and VTaC (right), threshold 0.5. The originally proposed cross-attention model (red) is near the bottom on both.'));
 P(h3('Confusion matrices and class-wise reports'));
@@ -344,7 +344,7 @@ P(...table('Class-wise classification report from the pooled confusion counts (s
     ['CNN-GRU recipe, VTaC', 'True alarm', '0.793', '0.933', '0.858', '120'],
     ['', 'False alarm', '0.972', '0.905', '0.937', '307'],
     { cells: ['', 'Macro avg. / weighted avg. F1', '0.883 / 0.922', '0.919 / 0.913', '0.897 / 0.915', '427'], _fill: 'F2F2F2' },
-  ], { size: 17, numFrom: 2 }));
+  ], { size: 20, numFrom: 2 }));
 P(h3('Training behaviour'));
 P(body('Per-epoch training and validation curves were not archived by the training scripts: each run stored the epoch of the best validation score, the validation AUC at that epoch and the final test metrics, and the model checkpoints were not kept. Plots of accuracy and loss against epoch can therefore not be shown without re-running the training, and none has been drawn here. What the stored records do show is where early stopping ended training.'));
 P(...fig('best_epoch.png', 6.0, 'Epoch at which each ensemble member of the CNN-GRU recipe reached its best inner-validation AUC (EMA weights). Dashed line: epoch cap.'));
@@ -412,7 +412,7 @@ A(...table('Paired F1 differences on Challenge 2015 (50 seed-by-fold pairs); Hol
     ['ResNet1D', 'Cross-attention', '-0.060', '[-0.087, -0.035]', '0.95', '< 0.001'],
     ['TCN', 'Cross-attention', '-0.052', '[-0.080, -0.023]', '1.00', '< 0.001'],
     ['Gradient boosting (v1)', 'Cross-attention', '-0.099', '[-0.133, -0.066]', '0.049', '< 0.001'],
-  ], { size: 17, numFrom: 2 }));
+  ], { size: 20, numFrom: 2 }));
 A(body('Only the comparison against gradient boosting satisfies the rule that both tests must agree after correction; the others are described as suggestive or not different.'));
 A(h2('B.2 Perturbation, noise and transfer experiments'));
 A(...fig('counterfactual.png', 4.6, 'Test AUC when the PPG is perturbed and the ECG is intact (seed-0 checkpoints, five test folds).'));
@@ -432,8 +432,8 @@ A(...table('Team contributions.', [2600, 6426], ['Member', 'Contribution (to be 
 // ---------- references ----------
 const refParas = [h1('10. References')];
 order.forEach((k, i) => refParas.push(new Paragraph({
-  spacing: { after: 90, line: 280 }, alignment: AlignmentType.LEFT, indent: { left: 480, hanging: 480 },
-  children: [new TextRun({ text: `[${i + 1}]\t`, font: FONT, size: 21 }), new TextRun({ text: REFS[k], font: FONT, size: 21 })],
+  spacing: { after: 90, line: 276 }, alignment: AlignmentType.LEFT, indent: { left: 480, hanging: 480 },
+  children: [new TextRun({ text: `[${i + 1}]\t`, font: FONT, size: 24 }), new TextRun({ text: REFS[k], font: FONT, size: 24 })],
   tabStops: [{ type: TabStopType.LEFT, position: 480 }] })));
 const missing = Object.keys(REFS).filter(k => !order.includes(k));
 if (missing.length) console.log('uncited refs (not listed):', missing.join(', '));
@@ -443,10 +443,10 @@ const children = [...S, ...refParas, ...AN];
 const doc = new Document({
   creator: 'Mini-project team', title: 'ICU alarm verification mini-project report',
   styles: {
-    default: { document: { run: { font: FONT, size: 24 } } },
+    default: { document: { run: { font: FONT, size: 28 } } },
     paragraphStyles: [
-      { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { size: 28, bold: true, font: FONT }, paragraph: { spacing: { before: 320, after: 160 }, outlineLevel: 0 } },
-      { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { size: 24, bold: true, font: FONT }, paragraph: { spacing: { before: 220, after: 100 }, outlineLevel: 1 } },
+      { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { size: 32, bold: true, font: FONT }, paragraph: { spacing: { before: 320, after: 160 }, outlineLevel: 0 } },
+      { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true, run: { size: 28, bold: true, font: FONT }, paragraph: { spacing: { before: 220, after: 100 }, outlineLevel: 1 } },
     ],
   },
   numbering: { config: [
@@ -456,7 +456,7 @@ const doc = new Document({
   ] },
   sections: [{
     properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
-    footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 20 })] })] }) },
+    footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 24 })] })] }) },
     children,
   }],
 });
