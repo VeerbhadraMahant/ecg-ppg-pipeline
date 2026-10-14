@@ -1,0 +1,342 @@
+% Every entry was checked against PubMed, PhysioNet, Zenodo, NeurIPS/arXiv pages or the
+% PhysioNet reference lists in this session, except the classic textbook/ML references
+% (Vaswani, He, Bai, Fawaz, Lin, Loshchilov, Smith, Nadeau-Bengio, Holm, Efron, Clopper-Pearson,
+% Guo, Pan-Tompkins, Chen, Paszke, Pedregosa, Khosla, Moody-NSTDB, Moody-MITBIH, Collins),
+% which are cited from memory with standard metadata: please spot-check them before submission.
+
+% ---------------- datasets ----------------
+@misc{clifford2015cincdata,
+  author       = {G. Clifford and I. Silva and B. Moody and R. G. Mark},
+  title        = {Reducing False Arrhythmia Alarms in the {ICU}: The {PhysioNet/Computing in Cardiology Challenge} 2015 (version 1.0.0)},
+  howpublished = {PhysioNet},
+  year         = {2015},
+  doi          = {10.13026/c9fg-a467},
+  url          = {https://physionet.org/content/challenge-2015/1.0.0/}
+}
+
+@misc{lehman2024vtacdata,
+  author       = {L.-w. Lehman and B. Moody and L. McCullum and H. Saeed and H. Deep and D. Perry and T. Struja and Q. Li and G. Clifford and R. Mark},
+  title        = {{VTaC}: A Benchmark Dataset of Ventricular Tachycardia Alarms from {ICU} Monitors},
+  howpublished = {PhysioNet, version 1.1},
+  year         = {2024},
+  doi          = {10.13026/z4f3-1f07},
+  url          = {https://physionet.org/content/vtac/}
+}
+
+@inproceedings{lehman2023vtac,
+  author    = {L. H. Lehman and B. Moody and H. Deep and F. Wu and H. Saeed and L. McCullum and D. Perry and T. Struja and Q. Li and G. Clifford and R. G. Mark},
+  title     = {{VTaC}: A Benchmark Dataset of Ventricular Tachycardia Alarms from {ICU} Monitors},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track},
+  volume    = {36},
+  year      = {2023},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/hash/7a53bf4e02022aad32a4019d41b3b476-Abstract-Datasets_and_Benchmarks.html}
+}
+
+@misc{charlton2025perform,
+  author       = {P. H. Charlton},
+  title        = {{MIMIC PERform} Datasets (version 2.0)},
+  howpublished = {Zenodo},
+  year         = {2025},
+  doi          = {10.5281/zenodo.15906524},
+  url          = {https://zenodo.org/records/15906524}
+}
+
+@article{charlton2022beats,
+  author  = {P. H. Charlton and K. Kotzen and E. Mej{\'\i}a-Mej{\'\i}a and P. J. Aston and K. Budidha and J. Mant and C. Pettit and J. A. Behar and P. A. Kyriacou},
+  title   = {Detecting beats in the photoplethysmogram: benchmarking open-source algorithms},
+  journal = {Physiological Measurement},
+  volume  = {43},
+  number  = {8},
+  year    = {2022},
+  doi     = {10.1088/1361-6579/ac826d}
+}
+
+@article{moody1984nstdb,
+  author  = {G. B. Moody and W. E. Muldrow and R. G. Mark},
+  title   = {A noise stress test for arrhythmia detectors},
+  journal = {Computers in Cardiology},
+  volume  = {11},
+  pages   = {381--384},
+  year    = {1984},
+  url     = {https://physionet.org/content/nstdb/1.0.0/}
+}
+
+@article{moody2001mitbih,
+  author  = {G. B. Moody and R. G. Mark},
+  title   = {The impact of the {MIT-BIH} Arrhythmia Database},
+  journal = {IEEE Engineering in Medicine and Biology Magazine},
+  volume  = {20},
+  number  = {3},
+  pages   = {45--50},
+  year    = {2001},
+  doi     = {10.1109/51.932724},
+  url     = {https://physionet.org/content/mitdb/1.0.0/}
+}
+
+@article{goldberger2000physionet,
+  author  = {A. L. Goldberger and L. A. N. Amaral and L. Glass and J. M. Hausdorff and P. C. Ivanov and R. G. Mark and J. E. Mietus and G. B. Moody and C.-K. Peng and H. E. Stanley},
+  title   = {{PhysioBank, PhysioToolkit, and PhysioNet}: components of a new research resource for complex physiologic signals},
+  journal = {Circulation},
+  volume  = {101},
+  number  = {23},
+  pages   = {e215--e220},
+  year    = {2000},
+  doi     = {10.1161/01.CIR.101.23.e215}
+}
+
+% ---------------- base papers: false-alarm reduction ----------------
+@inproceedings{clifford2015challenge,
+  author    = {G. D. Clifford and I. Silva and B. Moody and Q. Li and D. Kella and A. Shahin and T. Kooistra and D. Perry and R. G. Mark},
+  title     = {The {PhysioNet/Computing in Cardiology Challenge} 2015: Reducing false arrhythmia alarms in the {ICU}},
+  booktitle = {Computing in Cardiology},
+  volume    = {42},
+  pages     = {273--276},
+  year      = {2015},
+  doi       = {10.1109/CIC.2015.7408639}
+}
+
+@article{clifford2016false,
+  author  = {G. D. Clifford and I. Silva and B. Moody and Q. Li and D. Kella and A. Chahin and T. Kooistra and D. Perry and R. G. Mark},
+  title   = {False alarm reduction in critical care},
+  journal = {Physiological Measurement},
+  volume  = {37},
+  number  = {8},
+  pages   = {E5--E23},
+  year    = {2016},
+  doi     = {10.1088/0967-3334/37/8/E5}
+}
+
+@article{mousavi2020attention,
+  author  = {S. Mousavi and A. Fotoohinasab and F. Afghah},
+  title   = {Single-modal and multi-modal false arrhythmia alarm reduction using attention-based convolutional and recurrent neural networks},
+  journal = {PLOS ONE},
+  volume  = {15},
+  number  = {1},
+  pages   = {e0226990},
+  year    = {2020},
+  doi     = {10.1371/journal.pone.0226990}
+}
+
+@article{zhou2022contrastive,
+  author  = {Y. Zhou and G. Zhao and J. Li and G. Sun and X. Qian and B. Moody and R. G. Mark and L. H. Lehman},
+  title   = {A contrastive learning approach for {ICU} false arrhythmia alarm reduction},
+  journal = {Scientific Reports},
+  volume  = {12},
+  pages   = {4689},
+  year    = {2022},
+  doi     = {10.1038/s41598-022-07761-9}
+}
+
+@article{aboukhalil2008abp,
+  author  = {A. Aboukhalil and L. Nielsen and M. Saeed and R. G. Mark and G. D. Clifford},
+  title   = {Reducing false alarm rates for critical arrhythmias using the arterial blood pressure waveform},
+  journal = {Journal of Biomedical Informatics},
+  volume  = {41},
+  number  = {3},
+  pages   = {442--451},
+  year    = {2008},
+  doi     = {10.1016/j.jbi.2008.03.003}
+}
+
+@article{drew2014alarm,
+  author  = {B. J. Drew and P. Harris and J. K. Z{\`e}gre-Hemsey and T. Mammone and D. Schindler and R. Salas-Boni and Y. Bai and A. Tinoco and Q. Ding and X. Hu},
+  title   = {Insights into the problem of alarm fatigue with physiologic monitor devices: a comprehensive observational study of consecutive intensive care unit patients},
+  journal = {PLOS ONE},
+  volume  = {9},
+  number  = {10},
+  pages   = {e110274},
+  year    = {2014},
+  doi     = {10.1371/journal.pone.0110274}
+}
+
+@article{cvach2012alarm,
+  author  = {M. Cvach},
+  title   = {Monitor alarm fatigue: an integrative review},
+  journal = {Biomedical Instrumentation \& Technology},
+  volume  = {46},
+  number  = {4},
+  pages   = {268--277},
+  year    = {2012},
+  doi     = {10.2345/0899-8205-46.4.268}
+}
+
+% ---------------- foundation models ----------------
+@inproceedings{pillai2025papagei,
+  author    = {A. Pillai and D. Spathis and F. Kawsar and M. Malekzadeh},
+  title     = {{PaPaGei}: Open Foundation Models for Optical Physiological Signals},
+  booktitle = {Proc. International Conference on Learning Representations (ICLR)},
+  year      = {2025},
+  note      = {arXiv:2410.20542},
+  url       = {https://arxiv.org/abs/2410.20542}
+}
+
+@misc{mckeen2024ecgfm,
+  author       = {K. McKeen and others},
+  title        = {{ECG-FM}: An Open Electrocardiogram Foundation Model},
+  howpublished = {arXiv:2408.05178},
+  year         = {2024},
+  url          = {https://arxiv.org/abs/2408.05178}
+}
+
+% ---------------- methods ----------------
+@inproceedings{vaswani2017attention,
+  author    = {A. Vaswani and N. Shazeer and N. Parmar and J. Uszkoreit and L. Jones and A. N. Gomez and {\L}. Kaiser and I. Polosukhin},
+  title     = {Attention is all you need},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {30},
+  year      = {2017}
+}
+
+@inproceedings{he2016resnet,
+  author    = {K. He and X. Zhang and S. Ren and J. Sun},
+  title     = {Deep residual learning for image recognition},
+  booktitle = {Proc. IEEE Conf. Computer Vision and Pattern Recognition},
+  pages     = {770--778},
+  year      = {2016},
+  doi       = {10.1109/CVPR.2016.90}
+}
+
+@misc{bai2018tcn,
+  author       = {S. Bai and J. Z. Kolter and V. Koltun},
+  title        = {An empirical evaluation of generic convolutional and recurrent networks for sequence modeling},
+  howpublished = {arXiv:1803.01271},
+  year         = {2018}
+}
+
+@article{fawaz2020inceptiontime,
+  author  = {H. Ismail Fawaz and others},
+  title   = {{InceptionTime}: Finding {AlexNet} for time series classification},
+  journal = {Data Mining and Knowledge Discovery},
+  volume  = {34},
+  number  = {6},
+  pages   = {1936--1962},
+  year    = {2020},
+  doi     = {10.1007/s10618-020-00710-y}
+}
+
+@inproceedings{lin2017focal,
+  author    = {T.-Y. Lin and P. Goyal and R. Girshick and K. He and P. Doll{\'a}r},
+  title     = {Focal loss for dense object detection},
+  booktitle = {Proc. IEEE Int. Conf. Computer Vision},
+  pages     = {2980--2988},
+  year      = {2017},
+  doi       = {10.1109/ICCV.2017.324}
+}
+
+@inproceedings{loshchilov2019adamw,
+  author    = {I. Loshchilov and F. Hutter},
+  title     = {Decoupled weight decay regularization},
+  booktitle = {Proc. International Conference on Learning Representations},
+  year      = {2019}
+}
+
+@inproceedings{smith2019onecycle,
+  author    = {L. N. Smith and N. Topin},
+  title     = {Super-convergence: very fast training of neural networks using large learning rates},
+  booktitle = {Artificial Intelligence and Machine Learning for Multi-Domain Operations Applications, Proc. SPIE},
+  volume    = {11006},
+  year      = {2019},
+  doi       = {10.1117/12.2520589}
+}
+
+@inproceedings{khosla2020supcon,
+  author    = {P. Khosla and others},
+  title     = {Supervised contrastive learning},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  year      = {2020}
+}
+
+@inproceedings{chen2016xgboost,
+  author    = {T. Chen and C. Guestrin},
+  title     = {{XGBoost}: A scalable tree boosting system},
+  booktitle = {Proc. ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining},
+  pages     = {785--794},
+  year      = {2016},
+  doi       = {10.1145/2939672.2939785}
+}
+
+@article{pantompkins1985,
+  author  = {J. Pan and W. J. Tompkins},
+  title   = {A real-time {QRS} detection algorithm},
+  journal = {IEEE Transactions on Biomedical Engineering},
+  volume  = {BME-32},
+  number  = {3},
+  pages   = {230--236},
+  year    = {1985},
+  doi     = {10.1109/TBME.1985.325532}
+}
+
+@article{nadeau2003inference,
+  author  = {C. Nadeau and Y. Bengio},
+  title   = {Inference for the generalization error},
+  journal = {Machine Learning},
+  volume  = {52},
+  number  = {3},
+  pages   = {239--281},
+  year    = {2003},
+  doi     = {10.1023/A:1024068626366}
+}
+
+@article{holm1979,
+  author  = {S. Holm},
+  title   = {A simple sequentially rejective multiple test procedure},
+  journal = {Scandinavian Journal of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {65--70},
+  year    = {1979}
+}
+
+@book{efron1994bootstrap,
+  author    = {B. Efron and R. J. Tibshirani},
+  title     = {An Introduction to the Bootstrap},
+  publisher = {Chapman \& Hall/CRC},
+  year      = {1994}
+}
+
+@article{clopper1934,
+  author  = {C. J. Clopper and E. S. Pearson},
+  title   = {The use of confidence or fiducial limits illustrated in the case of the binomial},
+  journal = {Biometrika},
+  volume  = {26},
+  number  = {4},
+  pages   = {404--413},
+  year    = {1934},
+  doi     = {10.1093/biomet/26.4.404}
+}
+
+@inproceedings{guo2017calibration,
+  author    = {C. Guo and G. Pleiss and Y. Sun and K. Q. Weinberger},
+  title     = {On calibration of modern neural networks},
+  booktitle = {Proc. International Conference on Machine Learning},
+  pages     = {1321--1330},
+  year      = {2017}
+}
+
+@article{collins2024tripod,
+  author  = {G. S. Collins and others},
+  title   = {{TRIPOD+AI} statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods},
+  journal = {BMJ},
+  volume  = {385},
+  pages   = {e078378},
+  year    = {2024},
+  doi     = {10.1136/bmj-2023-078378}
+}
+
+@inproceedings{paszke2019pytorch,
+  author    = {A. Paszke and others},
+  title     = {{PyTorch}: An imperative style, high-performance deep learning library},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {32},
+  year      = {2019}
+}
+
+@article{pedregosa2011sklearn,
+  author  = {F. Pedregosa and others},
+  title   = {Scikit-learn: Machine learning in {Python}},
+  journal = {Journal of Machine Learning Research},
+  volume  = {12},
+  pages   = {2825--2830},
+  year    = {2011}
+}
