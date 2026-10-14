@@ -18,10 +18,12 @@
 
 \title{Does Cross-Attention Fusion of ECG and Pulse Signals Verify ICU Arrhythmia Alarms? A Leakage-Audited Study on PhysioNet/CinC 2015 and VTaC}
 
-\author{\IEEEauthorblockN{[Author 1], [Author 2], [Author 3]}
-\IEEEauthorblockA{[Department, Institution]\\
-[City, Country]\\
-[email addresses]}}
+\author{\IEEEauthorblockN{Veerbhadra Mahant, Ved Jadhav, Sharvil Patil, and Roshani Raut}
+\IEEEauthorblockA{Department of Information Technology\\
+Pimpri Chinchwad College of Engineering, Pune\\
+Pune, India\\
+veerbhadra.mahant24@pccoepune.org, ved.jadhav24@pccoepune.org,\\
+sharvil.patil24@pccoepune.org, roshani.raut@pccoepune.org}}
 
 \maketitle
 
@@ -364,9 +366,6 @@ A safety layer (temperature scaling, a risk-controlled threshold with a Clopper-
 %=====================================================================
 \section{Conclusion}\label{sec:conclusion}
 We tested whether cross-attention fusion of ECG and pulse signals verifies ICU arrhythmia alarms better than simpler alternatives. Under a leakage-free protocol it does not. The originally proposed model is no better than naive concatenation, and engineered-feature classifiers, a carefully trained hybrid attention CNN-GRU and ensembles clearly beat it (accuracy 0.878 to 0.913, F1 0.83 to 0.86). The two signals do complement each other, since fusion beats either signal alone on VTaC. But the models use the content of each signal, not the beat-to-pulse timing that motivated the design; the counterfactual tests and the attention-PTT analysis agree on this. An unnoticed validation leak had inflated our headline F1 by 0.075, and the controlled protocol is what makes the remaining conclusions trustworthy. Next steps are leave-one-site-out evaluation, larger unlabeled pretraining corpora and prospective validation. Code, configurations and result files are in the project repository.
-
-\section*{Acknowledgment}
-The authors thank the PhysioNet teams and the dataset creators cited in Table~\ref{tab:datasets}. [Add funding and supervisor acknowledgments.]
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
