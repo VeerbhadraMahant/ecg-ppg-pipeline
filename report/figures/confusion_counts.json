@@ -1,0 +1,30 @@
+{
+ "Challenge 2015: cross-attention (ladder)": {
+  "tp": 1631,
+  "fn": 599,
+  "fp": 794,
+  "tn": 2896,
+  "seeds": 10
+ },
+ "Challenge 2015: attention CNN-GRU recipe": {
+  "tp": 1842,
+  "fn": 388,
+  "fp": 377,
+  "tn": 3313,
+  "seeds": 10
+ },
+ "VTaC: cross-attention (ladder)": {
+  "tp": 488,
+  "fn": 112,
+  "fp": 220,
+  "tn": 1315,
+  "seeds": 5
+ },
+ "VTaC: attention CNN-GRU recipe": {
+  "tp": 560,
+  "fn": 40,
+  "fp": 146,
+  "tn": 1389,
+  "seeds": 5
+ }
+}
